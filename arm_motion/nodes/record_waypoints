@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+
+import sys
+import copy
+import rospy
+import moveit_commander
+import moveit_msgs.msg
+from geometry_msgs.msg import Pose, PoseStamped
+from math import pi
+from std_msgs.msg import String
+from moveit_commander.conversions import pose_to_list
+from std_srvs.srv import Empty, EmptyResponse, SetBool, SetBoolResponse
+from moveit_commander.conversions import pose_to_list
+from moveit_msgs.msg import MoveItErrorCodes
+from arm_move.srv import Step
+
+class MoveGroupPythonInterface(object):
+    def __init__(self):
+        super(MoveGroupPythonInterface, self).__init__()
+
+        ## First initialize `moveit_commander`_ and a `rospy`_ node:
+        moveit_commander.roscpp_initialize(sys.argv)
+        rospy.init_node('move_group_python_interface_move_arm', anonymous=True)
+
+        ## Set the name of the robot
+        self.robot_name = rospy.get_param("~robot_name")
+
+        ## Set the dof of the robot - this will make sure that the right number of joints are controlled
+        self.dof = rospy.get_param("~dof")
+
+        ## Instantiate a `RobotCommander`_ object. This object is the outer-level interface to
+        ## the robot:
+        robot = moveit_commander.RobotCommander()
+
+        ## Instantiate a `PlanningSceneInterface`_ object.  This object is an interface
+        ## to the world surrounding the robot:
+        scene = moveit_commander.PlanningSceneInterface()
+
+        ## Instantiate a `MoveGroupCommander`_ object.  This object is an interface
+        ## to one group of joints. 
+        ## This interface can be used to plan and execute motions on the Interbotix Arm:
+        group_name = "right_arm"
+        group = moveit_commander.MoveGroupCommander(group_name)
+
+        ## We create a `DisplayTrajectory`_ publisher which is used later to publish
+        ## trajectories for RViz to visualize:
+        display_trajectory_publisher = rospy.Publisher("move_group/display_planned_path",
+                                                        moveit_msgs.msg.DisplayTrajectory,
+                                                        queue_size=20)
+
+        ## Getting Basic Information
+        ## ^^^^^^^^^^^^^^^^^^^^^^^^^
+        # We can get the name of the reference frame for this robot:
+        planning_frame = group.get_planning_frame()
+        print("============ Reference frame: %s" % planning_frame)
+
+        # We can also print(the name of the end-effector link for this group:
+        eef_link = group.get_end_effector_link()
+        print("============ End effector: %s" % eef_link)
+
+        # We can get a list of all the groups in the robot:
+        group_names = robot.get_group_names()
+        print("============ Robot Groups:", robot.get_group_names())
+
+        # Sometimes for debugging it is useful to print(the entire state of the
+        # robot:
+        print("============ Printing robot state")
+        print(robot.get_current_state())
+        print("")
+"""
+        self.box_name = ''          # small light object to pick up
+        self.realsense_name = ''     # realsense box
+        self.table_name = ''        # table
+        self.robot = robot
+        self.scene = scene
+        self.group = group
+        self.gripper_group = gripper_group
+        self.display_trajectory_publisher = display_trajectory_publisher
+        self.planning_frame = planning_frame
+        self.eef_link = eef_link
+        self.group_names = group_names
+
+        # Create parameters on ROS parameter server for storing waypoints
+        self.x = rospy.get_param('/px100/mover/waypoints/x', 0)
+        self.y = rospy.get_param('/px100/mover/waypoints/y', 0)
+        self.z = rospy.get_param('/px100/mover/waypoints/z', 0)
+        # self.gripper_state = rospy.get_param('/px100/mover/waypoints/g', False)
+
+        # store all past states
+        self.x_list = []
+        self.y_list = []
+        self.z_list = []
+        # self.gripper_state_list = []
+
+        ## Add Table (add collision object upon startup)
+        robot_name = self.robot_name
+        table_name = self.table_name
+        scene = self.scene
+
+        table_pose = PoseStamped()
+        table_pose.header.frame_id = robot_name + "/base_link"
+        table_pose.pose.position.z = -0.025
+        table_pose.pose.orientation.w = 1.0
+        table_name = "table"
+        self.scene.add_box(table_name, table_pose, size=(0.5, 0.5, 0.1))
+
+        # Copy local variables back to class variables. In practice, you should use the class
+        # variables directly unless you have a good reason not to.
+        self.table_name = table_name
+        self.wait_for_state_update(box_is_known=True, timeout=4)
+
+        self.reset = rospy.Service("reset", SetBool, self.reset_callback)
+        self.step = rospy.Service("step", Step, self.step_callback)
+        self.follow = rospy.Service("follow", Empty, self.follow_callback)
+
+    def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
+        box_name = self.box_name
+        scene = self.scene
+
+        start = rospy.get_time()
+        seconds = rospy.get_time()
+        while (seconds - start < timeout) and not rospy.is_shutdown():
+            # Test if the box is in attached objects
+            attached_objects = scene.get_attached_objects([box_name])
+            is_attached = len(attached_objects.keys()) > 0
+
+            # Test if the box is in the scene.
+            # Note that attaching the box will remove it from known_objects
+            is_known = box_name in scene.get_known_object_names()
+            # Test if we are in the expected state
+            if (box_is_attached == is_attached) and (box_is_known == is_known):
+                return True
+
+            # Sleep so that we give other threads time on the processor
+            rospy.sleep(0.1)
+            seconds = rospy.get_time()
+
+        # If we exited the while loop without returning then we timed out
+        return False
+
+    def reset_callback(self, req):
+        # """ reset service callback
+        #     puts a small box (realsense box) into the scene
+        #     sets the robot position to home
+
+        #     args:
+        #         bool (True to clear waypoints, False to not clear)
+
+        #     returns:
+        #         SetBoolResponse
+        """
+        print(req.data)
+        robot_name = self.robot_name
+        realsense_name = self.realsense_name
+        scene = self.scene
+
+        realsense_pose = PoseStamped()
+        realsense_pose.header.frame_id = "world"
+        realsense_pose.pose.position.x = 0.15
+        realsense_pose.pose.position.y = -0.15
+        realsense_pose.pose.position.z = 0.025
+        realsense_pose.pose.orientation.w = 1.0
+        realsense_name = "realsense_box"
+        self.scene.add_box(realsense_name, realsense_pose, size=(0.140, 0.09, 0.05))
+
+        self.realsense_name = realsense_name
+        self.wait_for_state_update(box_is_known=True, timeout=4)
+
+        # return to home position. Define gripper as open in home position
+        self.group.set_named_target("Home")
+        self.group.go()
+        self.gripper_group.set_named_target("Open")
+        self.gripper_group.go(wait=True)
+
+        if req.data == True:
+            self.x_list = []
+            self.y_list = []
+            self.z_list = []
+            self.gripper_state_list = []
+
+            rospy.set_param('/px100/mover/waypoints/x', self.x_list)
+            rospy.set_param('/px100/mover/waypoints/y', self.y_list)
+            rospy.set_param('/px100/mover/waypoints/z', self.z_list)
+            rospy.set_param('/px100/mover/waypoints/g', self.gripper_state_list)
+            return SetBoolResponse(True, "waypoints cleared")
+        else:
+            return SetBoolResponse(True, "waypoints not cleared")
+
+    def step_callback(self, req):
+        # """ step service callback
+        #     reads in a user input pose and gripper boolean
+        #     plans a motion path and executes it
+        #     saves the user input points to a waypoints list if planning successful
+
+        #     args:
+        #         Pose
+        #         bool
+
+        #     returns:
+        #         MoveitErrorCodes
+        """
+        user_pose = req.pose                                # user-specified pose
+        gripper = req.gripper                               # gripper closed or open option
+        self.group.set_pose_target(user_pose)               # setting ee pose, if one is available
+        # Return a tuple of the motion planning results such as
+        # (success flag : boolean, trajectory message : RobotTrajectory,
+        # planning time : float, error code : MoveitErrorCodes) 
+        success, traj, p_time, errorcode = self.group.plan()
+        if success != True:
+            return errorcode
+        else:
+            self.group.execute(traj, wait=True)
+            self.group.stop()                                   # Calling ``stop()`` ensures that there is no residual movement
+            self.group.clear_pose_targets()
+
+            if gripper:
+                self.gripper_group.set_named_target("Closed")   
+            else:
+                self.gripper_group.set_named_target("Open")
+            self.gripper_group.go(wait=True)                             
+            self.gripper_group.stop()
+            self.gripper_group.clear_pose_targets()
+
+            # save the user input point
+            self.x_list.append(user_pose.position.x)
+            self.y_list.append(user_pose.position.y)
+            self.z_list.append(user_pose.position.z)
+            self.gripper_state_list.append(gripper)
+
+            # update the parameter on parameter server
+            rospy.set_param('/px100/mover/waypoints/x', self.x_list)
+            rospy.set_param('/px100/mover/waypoints/y', self.y_list)
+            rospy.set_param('/px100/mover/waypoints/z', self.z_list)
+            rospy.set_param('/px100/mover/waypoints/g', self.gripper_state_list)
+
+            return errorcode
+
+    def follow_callback(self, req):
+        # """ follow service callback
+        #     executes the path of previously saved waypoints
+
+        #     returns:
+        #         EmptyResponse
+        """
+        x = rospy.get_param('/px100/mover/waypoints/x')
+        y = rospy.get_param('/px100/mover/waypoints/y')
+        z = rospy.get_param('/px100/mover/waypoints/z')
+        gripper_state = rospy.get_param('/px100/mover/waypoints/g')
+
+        for i in range(len(x)):
+            p = Pose()
+            p.orientation.w = 1.0
+            p.position.x = x[i]
+            p.position.y = y[i]
+            p.position.z = z[i]
+            g = gripper_state[i]
+            self.group.set_pose_target(p)
+            success, traj, p_time, errorcode = self.group.plan()
+            self.group.execute(traj, wait=True)
+            self.group.stop()                                   # Calling ``stop()`` ensures that there is no residual movement
+            self.group.clear_pose_targets()
+
+            if g:
+                self.gripper_group.set_named_target("Closed")   
+            else:
+                self.gripper_group.set_named_target("Open")
+            self.gripper_group.go(wait=True)                             
+            self.gripper_group.stop()
+            self.gripper_group.clear_pose_targets()
+
+        return EmptyResponse()
+"""
+
+def main():
+    mover = MoveGroupPythonInterface()
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
