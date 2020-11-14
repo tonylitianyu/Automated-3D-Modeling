@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>arm_move</name>
+  <name>arm_motion</name>
   <version>0.0.0</version>
   <description>The arm_move package</description>
 

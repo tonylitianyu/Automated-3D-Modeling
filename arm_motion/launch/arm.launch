@@ -1,17 +1,15 @@
 <launch>
-    <arg name="fake_node" default="n" />
-    <rosparam command="load" file="$(find arm_move)/config/waypoints.yaml" />
+    <!-- <arg name="fake_node" default="n" /> -->
+    <!-- <rosparam command="load" file="$(find arm_move)/config/waypoints.yaml" /> -->
 
-    <include file="$(find interbotix_moveit)/launch/interbotix_moveit.launch">
-        <arg name="robot_name" value="px100" />
-        <arg name="use_fake" value="true" if="$(eval fake_node == 'y')" />
-        <arg name="use_actual" value="true" if="$(eval fake_node == 'n')" />
-        <arg name="dof" value="4" />
+    <include file="$(find sawyer_moveit_config)/launch/sawyer_moveit.launch">
+      <arg name="electric_gripper" default="true"/>
     </include>
 
-    <node name="mover" pkg="arm_move" type="mover">
-        <remap from="/attached_collision_object" to="/px100/attached_collision_object" />
-        <remap from="/collision_object" to="/px100/collision_object" />
+
+
+    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints">
+      <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 
 </launch>
