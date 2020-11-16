@@ -26,11 +26,9 @@ import rospy
 import math
 import tf2_ros
 from tf_conversions import transformations
-from homework2 import Eight, Kinematics
 from geometry_msgs.msg import Twist, Point, Pose, Quaternion, PoseStamped, TransformStamped
 from nav_msgs.msg import Path, Odometry
 from std_srvs.srv import Empty, EmptyResponse
-from turtlesim.srv import TeleportAbsolute
 
 class Trajectory:
     def __init__(self, freq):
@@ -48,34 +46,6 @@ class Trajectory:
         self.pause_srv = rospy.Service("pause", Empty, self.pause_callback)
         self.resume_srv = rospy.Service("resume", Empty, self.resume_callback)
 
-
-        #publisher init
-        self.pub_path = rospy.Publisher('path', Path, queue_size=10)
-
-        #trajectory generator init
-        self.traj_width = rospy.get_param("width")
-        self.traj_height = rospy.get_param("height")
-        self.traj_period = rospy.get_param('period')
-        self.traj_generator = Eight(self.traj_width,self.traj_height,self.traj_period)
-
-        #path within trajectory generator init
-        self.path = Path()
-        self.path.poses = []
-
-    def update_path(self,x,y):
-        """Add a pose to path and publish with x position, y position
-            Args:
-                x (float) - the x position of the pose
-                y (float) - the y position of the pose
-        """
-        path_tail_length = 200
-        self.path.header.stamp = rospy.Time.now()
-        self.path.header.frame_id = "world"
-        if len(self.path.poses) > path_tail_length:
-            del self.path.poses[0]
-        self.path.poses.append(PoseStamped(header = self.path.header, 
-                                    pose = Pose(position = Point(x,y,0),orientation = Quaternion(0,0,0,1))))
-        self.pub_path.publish(self.path)
 
     def pause_callback(self,emp):
         """Callback function to pause tje robot for the <pause> service
@@ -109,94 +79,29 @@ class TurtleBot:
         """Init a trajectory object that create trajectory for the robot
         """
 
-        #init kinematics calculation
-        self.traj_width = rospy.get_param("width")
-        self.traj_height = rospy.get_param("height")
-        self.traj_period = rospy.get_param('period')
-        self.control = Kinematics(self.traj_width, self.traj_height, self.traj_period)
-
-        #init angle
-        self.init_angle = self.control.get_angle(0.0)
-        self.init_angle_ready = True
-        rospy.sleep(1.0)
-
-
-        #frame init
-        self.static_broadcaster = tf2_ros.StaticTransformBroadcaster()
-        self.world_odom_tf = TransformStamped()
-        self.world_odom_tf.header.stamp = rospy.Time.now()
-        self.world_odom_tf.header.frame_id = "world"
-        self.world_odom_tf.child_frame_id = "odom"
-        self.world_odom_tf.transform.translation.x = 0
-        self.world_odom_tf.transform.translation.y = 0
-        self.world_odom_tf.transform.translation.z = 0
-        q_world = transformations.quaternion_about_axis(self.init_angle,[0,0,1])
-        self.world_odom_tf.transform.rotation = Quaternion(*q_world)
-        self.static_broadcaster.sendTransform(self.world_odom_tf)
-
-        self.broadcaster = tf2_ros.TransformBroadcaster()
-
         #init publisher
         self.pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size = 10)
 
-        #init subscriber
-        #rospy.Subscriber('odom', Odometry, self.odom_callback)
-
-        #this is for internal simulation on turtlesim
-        #self.tele = rospy.ServiceProxy("turtle1/teleport_absolute", TeleportAbsolute)
-        
-        
-
-        #this is for internal simulation on turtlesim
-        #self.tele(5.54,5.54,self.control.get_angle(0.0))
-
-
-
-    def update_frame(self,t):
-        """Broadcasting frame update
-            Args:
-                t (float) - current time
-        """
-        turtlebot_frame = TransformStamped()
-        turtlebot_frame.header.stamp = rospy.Time.now()
-        turtlebot_frame.header.frame_id = "odom"
-        turtlebot_frame.child_frame_id = "turtlebot"
-        turtlebot_frame.transform.translation.x = 0
-        turtlebot_frame.transform.translation.y = 0
-        turtlebot_frame.transform.translation.z = 0
-
-
-        radians = self.control.get_angle(t)-self.init_angle
-
-        q1 = transformations.quaternion_about_axis(radians,[0,0,1])
-        turtlebot_frame.transform.rotation = Quaternion(*q1)
-
-        self.broadcaster.sendTransform(turtlebot_frame)
-
-
-
-
-    def update_velocity(self,t):
+    def update_velocity(self):
         """Publishing new calculated velocity to <cmd_vel>
             Args:
-                t (float) - current time
         """
-        if self.init_angle_ready == True:
-            v = self.control.get_linear_vel(t)
-            omega = self.control.get_angular_vel(t)
 
-            #rospy.loginfo(str(omega))
-            vel = Twist()
-            vel.linear.x = v
-            vel.angular.z = omega
-            self.pub_vel.publish(vel)
+        v = 0.0
+        omega = 0.5
+
+        #rospy.loginfo(str(omega))
+        vel = Twist()
+        vel.linear.x = v
+        vel.angular.z = omega
+        self.pub_vel.publish(vel)
 
 
 def main():
     """ The main() function. """
     #ros node init
     rospy.init_node('trajectory')
-    pub_freq = rospy.get_param("~pub_freq")
+    pub_freq = 50
     r = rospy.Rate(pub_freq)
     rospy.sleep(1.0)
 
@@ -207,14 +112,12 @@ def main():
     rospy.sleep(1.0)
     while not rospy.is_shutdown():
         
-        if traj.update and turtle.init_angle_ready:
-            traj_x,traj_y = traj.traj_generator.draw_eight(traj.t)
-            traj.update_path(traj_x,traj_y)
+        if traj.update:
             traj.t_increase()
-
-            turtle.update_frame(traj.t)
-            turtle.update_velocity(traj.t)
+            print(traj.t)
+            turtle.update_velocity()
         else:
+            print(traj.t)
             turtle.pub_vel.publish(Twist())
         r.sleep()
 
