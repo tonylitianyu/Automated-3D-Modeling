@@ -102,6 +102,14 @@ class MoveGroupPythonInterface(object):
         self.y_o_list = []
         self.z_o_list = []
         self.w_o_list = []
+
+        self.x_sent_list = []
+        self.y_sent_list = []
+        self.z_sent_list = []
+        self.x_sent_o_list = []
+        self.y_sent_o_list = []
+        self.z_sent_o_list = []
+        self.w_sent_o_list = []
     #     # self.gripper_state_list = []
 
     #     ## Add Table (add collision object upon startup)
@@ -124,6 +132,7 @@ class MoveGroupPythonInterface(object):
     #     self.reset = rospy.Service("reset", SetBool, self.reset_callback)
         self.step = rospy.Service("step", Step, self.step_callback)
         self.follow = rospy.Service("follow", Empty, self.follow_callback)
+        self.sawyer_plan = rospy.Service("sawyer_plan", Step, self.sawyer_plan_callback)
 
     # def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
     #     box_name = self.box_name
@@ -269,6 +278,52 @@ class MoveGroupPythonInterface(object):
             self.group.clear_pose_targets()
 
         return EmptyResponse()
+
+    def sawyer_plan_callback(self, req):
+        """ step service callback
+            reads in a user input pose and gripper boolean
+            plans a motion path and executes it
+            saves the user input points to a waypoints list if planning successful
+
+            args:
+                Pose
+                bool
+
+            returns:
+                MoveitErrorCodes
+        """
+        user_pose = req.pose                                # user-specified pose
+        self.group.set_pose_target(user_pose)               # setting ee pose, if one is available
+        # Return a tuple of the motion planning results such as
+        # (success flag : boolean, trajectory message : RobotTrajectory,
+        # planning time : float, error code : MoveitErrorCodes) 
+        success, traj, p_time, errorcode = self.group.plan()
+        if success != True:
+            return errorcode
+        else:
+            self.group.execute(traj, wait=True)
+            self.group.stop()                                   # Calling ``stop()`` ensures that there is no residual movement
+            self.group.clear_pose_targets()
+
+            self.x_sent_list.append(user_pose.position.x)
+            self.y_sent_list.append(user_pose.position.y)
+            self.z_sent_list.append(user_pose.position.z)
+            self.x_sent_o_list.append(user_pose.orientation.x)
+            self.y_sent_o_list.append(user_pose.orientation.y)
+            self.z_sent_o_list.append(user_pose.orientation.z)
+            self.w_sent_o_list.append(user_pose.orientation.w)
+
+            print(self.x_list)
+
+            rospy.set_param('/waypoints/x_sent', user_pose.position.x)
+            rospy.set_param('/waypoints/y_sent', user_pose.position.y)
+            rospy.set_param('/waypoints/z_sent', user_pose.position.z)
+            rospy.set_param('/waypoints/x_sent_o', user_pose.orientation.x)
+            rospy.set_param('/waypoints/y_sent_o', user_pose.orientation.y)
+            rospy.set_param('/waypoints/z_sent_o', user_pose.orientation.z)
+            rospy.set_param('/waypoints/w_sent_o', user_pose.orientation.w)
+
+            return errorcode
 
 
 def main():
