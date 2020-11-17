@@ -6,10 +6,10 @@
       <arg name="electric_gripper" default="true"/>
     </include>
 
-
-
     <node name="record_waypoints" pkg="arm_motion" type="record_waypoints">
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
+
+    <rosparam command="load" file="$(find arm_motion)/config/waypoints.yaml" />
 
 </launch>
