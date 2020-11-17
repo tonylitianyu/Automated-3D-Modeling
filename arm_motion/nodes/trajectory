@@ -105,6 +105,8 @@ class TurtleBot:
             step = 2*math.pi/self.scan_side
             self.scan_side_arr.append(i*step)
 
+        self.scan_side_arr.append(0)
+
         #interact with sawyer
         #self.pub_finish = rospy.Publisher('next', String, queue_size=10)
         self.sub_finish = rospy.Subscriber('next', String, self.nextCallback)
@@ -120,12 +122,11 @@ class TurtleBot:
         # temp_goal = self.scan_side_arr[self.curr_scan_idx]
         # if temp_goal < 0:
         #     temp_goal = math.pi+(temp_goal-math.pi)
-        if self.scan_side_arr[self.curr_scan_idx] > math.pi or self.scan_side_arr[self.curr_scan_idx] < 0:
-            self.scan_side_arr[self.curr_scan_idx] = -1*self.scan_side_arr[self.curr_scan_idx]
+        goal_ori = self.scan_side_arr[self.curr_scan_idx]
+        if goal_ori > math.pi:
+            goal_ori = -(math.pi-(goal_ori-math.pi))
 
-        print(self.scan_side_arr[self.curr_scan_idx])
-
-        if abs(self.curr_ori_euler[2] - self.scan_side_arr[self.curr_scan_idx]) > 0.1:
+        if abs(self.curr_ori_euler[2] - goal_ori) > 0.1:
             v = 0.0
             omega = 0.5
         else:
@@ -147,9 +148,10 @@ class TurtleBot:
         #print(self.curr_ori_euler)
 
     def nextCallback(self,data):
-        self.curr_scan_idx += 1
-        if self.curr_scan_idx > self.scan_side:
-            self.scan_side_arr = 0
+        if data == String('turtle'):
+            self.curr_scan_idx += 1
+            if self.curr_scan_idx > self.scan_side:
+                self.curr_scan_idx = 0
 
 
 def main():
