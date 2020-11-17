@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch" />
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
+    <!--<node type="rviz" name="rviz" pkg="rviz" />-->
+    <!--<node name="trajectory" pkg="arm_motion" type="trajectory" />-->
+</launch>
