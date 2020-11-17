@@ -64,7 +64,7 @@ class Trajectory:
                 empty (EmptyResponse) - returns empty
         """
         self.update = True
-        self.pub_finish.publish(String('turtle'))
+        #self.pub_finish.publish(String('turtle'))
         return EmptyResponse()
 
     def t_increase(self):
