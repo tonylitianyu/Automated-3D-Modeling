@@ -114,7 +114,18 @@ class TurtleBot:
         """Publishing new calculated velocity to <cmd_vel>
             Args:
         """
-        if abs(self.curr_ori_euler[2] - self.scan_side_arr[self.curr_scan_idx]) > 0.05:
+        # temp_curr = self.curr_ori_euler[2]
+        # if temp_curr < 0:
+        #     temp_curr = math.pi+(temp_curr-math.pi)
+        # temp_goal = self.scan_side_arr[self.curr_scan_idx]
+        # if temp_goal < 0:
+        #     temp_goal = math.pi+(temp_goal-math.pi)
+        if self.scan_side_arr[self.curr_scan_idx] > math.pi or self.scan_side_arr[self.curr_scan_idx] < 0:
+            self.scan_side_arr[self.curr_scan_idx] = -1*self.scan_side_arr[self.curr_scan_idx]
+
+        print(self.scan_side_arr[self.curr_scan_idx])
+
+        if abs(self.curr_ori_euler[2] - self.scan_side_arr[self.curr_scan_idx]) > 0.1:
             v = 0.0
             omega = 0.5
         else:
@@ -136,7 +147,6 @@ class TurtleBot:
         #print(self.curr_ori_euler)
 
     def nextCallback(self,data):
-        print(self.curr_scan_idx)
         self.curr_scan_idx += 1
         if self.curr_scan_idx > self.scan_side:
             self.scan_side_arr = 0
