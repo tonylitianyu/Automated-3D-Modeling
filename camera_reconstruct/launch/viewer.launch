@@ -3,7 +3,7 @@
     <!-- launch realsense pointcloud node-->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="filters" value="pointcloud"/>
-        <arg name='clip_distance' value='0.4'/>
+        <arg name='clip_distance' value='0.7'/>
     </include>
 
     <!-- launch rviz -->

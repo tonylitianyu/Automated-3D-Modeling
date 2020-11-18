@@ -7,4 +7,5 @@ Please follow the structure:
   --arm_motion
   --camera_motion
   --camera_reconstruct
+    --sudo apt install python3-pcl
 ```
