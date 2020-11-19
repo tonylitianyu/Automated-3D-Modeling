@@ -13,6 +13,7 @@ from std_srvs.srv import Empty, EmptyResponse, SetBool, SetBoolResponse
 from moveit_commander.conversions import pose_to_list
 from moveit_msgs.msg import MoveItErrorCodes
 from arm_motion.srv import Step
+from camera_reconstruct.srv import save_pc
 
 class MoveGroupPythonInterface(object):
     def __init__(self):
@@ -36,7 +37,38 @@ class MoveGroupPythonInterface(object):
 
         self.initial_pose = self.group.get_current_pose().pose
 
+        ## initilize variables
+        self.count = 0
+
+        
+
+        # store all past states
+        self.x_list = []
+        self.y_list = []
+        self.z_list = []
+        self.x_o_list = []
+        self.y_o_list = []
+        self.z_o_list = []
+        self.w_o_list = []
+
+        self.x_sent_list = []
+        self.y_sent_list = []
+        self.z_sent_list = []
+        self.x_sent_o_list = []
+        self.y_sent_o_list = []
+        self.z_sent_o_list = []
+        self.w_sent_o_list = []
+
+        ## initilize service
+        self.reset = rospy.Service("reset", Empty, self.reset_callback)
+        self.step = rospy.Service("step", Step, self.step_callback)
+        self.follow = rospy.Service("follow", Empty, self.follow_callback)
+
+        ## initilize publisher and subscriber
         self.turtle_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
+        self.turtle_go = rospy.Publisher('/next', String, queue_size=10)
+
+        
         
         ## store three target positions into waypoints
         self.scan_x = rospy.get_param('/waypoints/x')
@@ -57,38 +89,39 @@ class MoveGroupPythonInterface(object):
         self.home.orientation.w = self.scan_w_o[0]
         rospy.loginfo('saved home pose')
 
+        ## set to picture position
+        self.picture = Pose()
+        self.picture.position.x = self.scan_x[1]
+        self.picture.position.y = self.scan_y[1]
+        self.picture.position.z = self.scan_z[1]
+        self.picture.orientation.x = self.scan_x_o[1]
+        self.picture.orientation.y = self.scan_y_o[1]
+        self.picture.orientation.z = self.scan_z_o[1]
+        self.picture.orientation.w = self.scan_w_o[1]
+
         # self.group.set_named_target("Home")
         self.group.set_pose_target(self.home)
         success, traj, p_time, errorcode = self.group.plan()
-        # self.group.go()
+    
         self.group.execute(traj, wait=True)
         self.group.stop()                                  
         self.group.clear_pose_targets()
         rospy.loginfo('moved to home')
 
-    #     # store all past states
-        self.x_list = []
-        self.y_list = []
-        self.z_list = []
-        self.x_o_list = []
-        self.y_o_list = []
-        self.z_o_list = []
-        self.w_o_list = []
+        # go ti picture position
+        self.group.set_pose_target(self.picture)
+        success, traj, p_time, errorcode = self.group.plan()
 
-        self.x_sent_list = []
-        self.y_sent_list = []
-        self.z_sent_list = []
-        self.x_sent_o_list = []
-        self.y_sent_o_list = []
-        self.z_sent_o_list = []
-        self.w_sent_o_list = []
+        self.group.execute(traj, wait=True)
+        self.group.stop()                                  
+        self.group.clear_pose_targets()
+        rospy.loginfo('moved to picture position')
 
-        self.reset = rospy.Service("reset", Empty, self.reset_callback)
-        self.step = rospy.Service("step", Step, self.step_callback)
-        self.follow = rospy.Service("follow", Empty, self.follow_callback)
+        ## call service to take first picture
+        rospy.wait_for_service('generate_pc/save_pc')
+        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc) 
+        self.turtle_go.publish(String('turtle'))
 
-        # self.arm_action = rospy.Subscriber('/next', Bool, self.arm_action_callback)
-        self.turtle_go = rospy.Publisher('/next', String, queue_size=10)
 
     def reset_callback(self, req):
         """ reset service callback
@@ -109,27 +142,58 @@ class MoveGroupPythonInterface(object):
 
     def arm_action_callback(self, req):
         rospy.loginfo(req)
-        print('ARM ACTION CALLBACK')
-        print(req == String('sawyer'))
-        if req == String('sawyer'):
-            for i in range(len(self.scan_x)):
-                p = Pose()
-                p.orientation.x = self.scan_x_o[i]
-                p.orientation.y = self.scan_y_o[i]
-                p.orientation.z = self.scan_z_o[i]
-                p.orientation.w = self.scan_w_o[i]
-                p.position.x = self.scan_x[i]
-                p.position.y = self.scan_y[i]
-                p.position.z = self.scan_z[i]
-
-                self.group.set_pose_target(p)
-                success, traj, p_time, errorcode = self.group.plan()
-                self.group.execute(traj, wait=True)
-                self.group.stop()                                  
-                self.group.clear_pose_targets()
-
+        # print('ARM ACTION CALLBACK')
+        # print(req == String('sawyer'))
+        
+        if req == String('camera'):
+            rospy.wait_for_service('generate_pc/save_pc')
+            self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+            rospy.sleep(2)  # set delay for taking pictures
             pub = String('turtle')
             self.turtle_go.publish(pub)
+            self.count = self.count + 1
+
+        if req == String('sawyer'):
+            p = Pose()
+            p.orientation.x = self.scan_x_o[2]
+            p.orientation.y = self.scan_y_o[2]
+            p.orientation.z = self.scan_z_o[2]
+            p.orientation.w = self.scan_w_o[2]
+            p.position.x = self.scan_x[2]
+            p.position.y = self.scan_y[2]
+            p.position.z = self.scan_z[2]
+
+            self.group.set_pose_target(p)
+            success, traj, p_time, errorcode = self.group.plan()
+            self.group.execute(traj, wait=True)
+            self.group.stop()                                  
+            self.group.clear_pose_targets()
+
+            pub = String('camera')
+            self.turtle_go.publish(pub)
+
+
+
+
+        # if req == String('sawyer'):
+        #     for i in range(len(self.scan_x)):
+        #         p = Pose()
+        #         p.orientation.x = self.scan_x_o[i]
+        #         p.orientation.y = self.scan_y_o[i]
+        #         p.orientation.z = self.scan_z_o[i]
+        #         p.orientation.w = self.scan_w_o[i]
+        #         p.position.x = self.scan_x[i]
+        #         p.position.y = self.scan_y[i]
+        #         p.position.z = self.scan_z[i]
+
+        #         self.group.set_pose_target(p)
+        #         success, traj, p_time, errorcode = self.group.plan()
+        #         self.group.execute(traj, wait=True)
+        #         self.group.stop()                                  
+        #         self.group.clear_pose_targets()
+
+        #     pub = String('turtle')
+        #     self.turtle_go.publish(pub)
 
     def step_callback(self, req):
         """ step service callback
