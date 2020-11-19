@@ -10,6 +10,7 @@ project(camera_reconstruct)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
+  pcl_ros
   roscpp
   rospy
   sensor_msgs
@@ -109,7 +110,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES camera_reconstruct
- CATKIN_DEPENDS geometry_msgs message_runtime sensor_msgs std_msgs
+ CATKIN_DEPENDS geometry_msgs message_runtime pcl_ros roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
