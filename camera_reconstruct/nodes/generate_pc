@@ -21,6 +21,9 @@ class GeneratePC:
         #initialize subscribers
         rospy.Subscriber('pc',PointCloud2,self.pc_callback)
 
+        #initialize publishers
+        self.pc_pub = rospy.Publisher('saved_pcs',PointCloud2,queue_size=10,latch=True)
+
         #initialize services
         self.save_pc = rospy.Service('generate_pc/save_pc',save_pc,self.savepc_callback)
 
@@ -41,8 +44,15 @@ class GeneratePC:
             mypc: saved PointCloud2 message
         '''
         mypc = self.cur_pc
+        self.publish_pc(mypc)
         self.pc_list.append(mypc)
         return mypc
+    
+    def publish_pc(self,mypc):
+        '''
+        publishes the latest PointCloud2 message to saved_pcs topic
+        '''
+        self.pc_pub.publish(mypc)
 
 def main():
     rospy.init_node('generate_pc')
