@@ -11,6 +11,8 @@ class GeneratePC:
     '''
     def __init__(self):
         '''
+        Constructor of GeneratePC class
+        initializes attributes, subscribers, and services
         '''
         #initialize attributes
         self.cur_pc = PointCloud2()     #current pointcloud from realsense
@@ -23,9 +25,21 @@ class GeneratePC:
         self.save_pc = rospy.Service('generate_pc/save_pc',save_pc,self.savepc_callback)
 
     def pc_callback(self,pc):
+        '''
+        subscriber callback function
+        updates self.cur_pc to the most recent PointCloud2 message from the Realsense
+        '''
         self.cur_pc = pc
 
     def savepc_callback(self,emp):
+        '''
+        save_pc callback function
+        saves PointCloud2 message in pc_list
+        args:
+            emp: empty variable
+        returns:
+            mypc: saved PointCloud2 message
+        '''
         mypc = self.cur_pc
         self.pc_list.append(mypc)
         return mypc
