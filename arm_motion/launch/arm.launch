@@ -12,4 +12,12 @@
 
     <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
 
+    <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
+
+    <!-- <include file="$(find arm_motion)/launch/turtlebot.launch"/> -->
+
+
+      
+    
+
 </launch>
