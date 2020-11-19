@@ -1,10 +1,10 @@
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
+#include "std_msgs/String.h"
 
 void mycallback(const sensor_msgs::PointCloud2 PCmsg)
 {
-    ROS_INFO("frame: %s", PCmsg.header.frame_id->data.c_str());
-    // ROS_INFO("frame: %s", "im a frame");
+    ROS_INFO_STREAM(PCmsg.header);
 }
 
 int main(int argc, char **argv)
