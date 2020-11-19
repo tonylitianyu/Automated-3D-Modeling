@@ -1,1 +1,42 @@
 #!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import PointCloud2
+from camera_reconstruct.srv import save_pc
+
+class GeneratePC:
+    '''
+    Services:       save_pc - outputs a single PointCloud2 message
+    Subscribers:    /camera/depth/color/points - PointCloud2 messages from realsense
+    '''
+    def __init__(self):
+        '''
+        '''
+        #initialize attributes
+        self.cur_pc = PointCloud2()     #current pointcloud from realsense
+        self.pc_list = []               #list of saved pointclouds
+
+        #initialize subscribers
+        rospy.Subscriber('pc',PointCloud2,self.pc_callback)
+
+        #initialize services
+        self.save_pc = rospy.Service('generate_pc/save_pc',save_pc,self.savepc_callback)
+
+    def pc_callback(self,pc):
+        self.cur_pc = pc
+
+    def savepc_callback(self,emp):
+        mypc = self.cur_pc
+        self.pc_list.append(mypc)
+        return mypc
+
+def main():
+    rospy.init_node('generate_pc')
+    gpc = GeneratePC()
+    rospy.spin()
+
+if __name__ == "__main__":
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

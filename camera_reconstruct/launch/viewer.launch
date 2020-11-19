@@ -9,4 +9,9 @@
     <!-- launch rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/pointcloud_viewer.rviz"/>
 
+    <!-- launch generate_pc node -->
+    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen'>
+        <remap from='pc' to='/camera/depth/color/points' />
+    </node>
+
 </launch>
