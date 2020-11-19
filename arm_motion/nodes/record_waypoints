@@ -29,7 +29,7 @@ class MoveGroupPythonInterface(object):
 
         group_name = "right_arm"
         self.group = moveit_commander.MoveGroupCommander(robot_description='/robot_description', name=group_name)
-
+        #self.group.set_planner_id('LBKPIECE')
         display_trajectory_publisher = rospy.Publisher("move_group/display_planned_path",
                                                         moveit_msgs.msg.DisplayTrajectory,
                                                         queue_size=20)
