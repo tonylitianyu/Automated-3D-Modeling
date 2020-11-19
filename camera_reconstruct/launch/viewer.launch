@@ -14,4 +14,7 @@
         <remap from='pc' to='/camera/depth/color/points' />
     </node>
 
+    <!-- launch fuse_pc node -->
+    <node name="fuse_pc" pkg='camera_reconstruct' type='fuse_pc' output='screen'/>
+
 </launch>
