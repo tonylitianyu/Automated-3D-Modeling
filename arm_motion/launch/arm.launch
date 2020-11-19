@@ -10,6 +10,6 @@
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 
-    <rosparam command="load" file="$(find arm_motion)/config/waypoints.yaml" />
+    <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
 
 </launch>
