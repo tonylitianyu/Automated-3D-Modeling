@@ -8,9 +8,9 @@ class FusePC
     ros::Subscriber pcsub;
 
     public:
-    pcCollect(ros::NodeHandle *nh)
+    FusePC(ros::NodeHandle *nh)
     {
-        pcsub = nh->subscribe("saved_pcs",1000,FusePC::mycallback,this);
+        pcsub = nh->subscribe("saved_pcs",1000,&FusePC::mycallback,this);
     }
     void mycallback(const sensor_msgs::PointCloud2 PCmsg)
     {
