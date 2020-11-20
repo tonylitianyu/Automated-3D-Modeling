@@ -60,7 +60,7 @@ class GeneratePC:
         transforms most recent PointCloud2 message to odom frame
         updates self.cur_pc to transformed PointCloud2 message
         '''
-        #Transform point cloud to odom frame
+        #Transform point cloud to base_scan frame
         try:
             trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration.from_sec(0.1))
         except tf2.LookupException as ex:
