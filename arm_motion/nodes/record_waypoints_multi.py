@@ -72,13 +72,13 @@ class MoveGroupPythonInterface(object):
         
         
         ## store three target positions into waypoints
-        self.scan_x = rospy.get_param('/waypoints/x')
-        self.scan_y = rospy.get_param('/waypoints/y')
-        self.scan_z = rospy.get_param('/waypoints/z')
-        self.scan_x_o = rospy.get_param('/waypoints/x_o')
-        self.scan_y_o = rospy.get_param('/waypoints/y_o')
-        self.scan_z_o = rospy.get_param('/waypoints/z_o')
-        self.scan_w_o = rospy.get_param('/waypoints/w_o')
+        self.scan_x = rospy.get_param('/waypoints_2/x')
+        self.scan_y = rospy.get_param('/waypoints_2/y')
+        self.scan_z = rospy.get_param('/waypoints_2/z')
+        self.scan_x_o = rospy.get_param('/waypoints_2/x_o')
+        self.scan_y_o = rospy.get_param('/waypoints_2/y_o')
+        self.scan_z_o = rospy.get_param('/waypoints_2/z_o')
+        self.scan_w_o = rospy.get_param('/waypoints_2/w_o')
         
         ## save home pose 
         self.home.position.x = self.scan_x[0]
@@ -151,40 +151,29 @@ class MoveGroupPythonInterface(object):
 
     def arm_action_callback(self, req):
         rospy.loginfo(req)
-        # print('ARM ACTION CALLBACK')
-        # print(req == String('sawyer'))
-        
-        if req == String('camera'):
-            rospy.wait_for_service('generate_pc/save_pc')
-            self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
-            rospy.sleep(2)  # set delay for taking pictures
-            
-            self.count = self.count + 1
-            if self.count <= 4:
-                pub = String('turtle')
-                self.next_pub.publish(pub)
-            else:
-                self.count = 0 
-                pass
 
         if req == String('sawyer'):
-            p = Pose()
-            p.orientation.x = self.scan_x_o[2]
-            p.orientation.y = self.scan_y_o[2]
-            p.orientation.z = self.scan_z_o[2]
-            p.orientation.w = self.scan_w_o[2]
-            p.position.x = self.scan_x[2]
-            p.position.y = self.scan_y[2]
-            p.position.z = self.scan_z[2]
+            for i in range(len(self.x_list)):
+                p = Pose()
+                p.orientation.x = self.x_o_list[i]
+                p.orientation.y = self.y_o_list[i]
+                p.orientation.z = self.z_o_list[i]
+                p.orientation.w = self.w_o_list[i]
+                p.position.x = self.x_list[i]
+                p.position.y = self.y_list[i]
+                p.position.z = self.z_list[i]
 
-            self.group.set_pose_target(p)
-            success, traj, p_time, errorcode = self.group.plan()
-            self.group.execute(traj, wait=True)
-            self.group.stop()                                  
-            self.group.clear_pose_targets()
+                self.group.set_pose_target(p)
+                success, traj, p_time, errorcode = self.group.plan()
+                self.group.execute(traj, wait=True)
+                self.group.stop()                                   # Calling ``stop()`` ensures that there is no residual movement
+                self.group.clear_pose_targets()
 
-            pub = String('camera')
-            self.next_pub.publish(pub)
+                rospy.wait_for_service('generate_pc/save_pc')
+                self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+                rospy.sleep(2)
+            self.next_pub.publish(String('turtle'))
+            
 
     def home_position(self):
         """
