@@ -30,6 +30,7 @@ class MoveGroupPythonInterface(object):
 
         group_name = "right_arm"
         self.group = moveit_commander.MoveGroupCommander(robot_description='/robot_description', name=group_name)
+        self.group.set_max_velocity_scaling_factor(1) # increase robot joint speeds
         #self.group.set_planner_id('LBKPIECE')
         display_trajectory_publisher = rospy.Publisher("move_group/display_planned_path",
                                                         moveit_msgs.msg.DisplayTrajectory,
@@ -42,7 +43,6 @@ class MoveGroupPythonInterface(object):
         self.home = Pose()
         self.picture = Pose()
         
-
         # store all past states
         self.x_list = []
         self.y_list = []
@@ -69,8 +69,6 @@ class MoveGroupPythonInterface(object):
         self.next_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
         self.next_pub = rospy.Publisher('/next', String, queue_size=10)
 
-        
-        
         ## store three target positions into waypoints
         self.scan_x = rospy.get_param('/waypoints/x')
         self.scan_y = rospy.get_param('/waypoints/y')
@@ -98,26 +96,10 @@ class MoveGroupPythonInterface(object):
         self.picture.orientation.y = self.scan_y_o[1]
         self.picture.orientation.z = self.scan_z_o[1]
         self.picture.orientation.w = self.scan_w_o[1]
+        rospy.loginfo('saved first picture pose')
 
-        self.group.set_pose_target(self.home)
-        success, traj, p_time, errorcode = self.group.plan()
-    
-        self.group.execute(traj, wait=True)
-        self.group.stop()                                  
-        self.group.clear_pose_targets()
-        rospy.loginfo('moved to home')
-
-        # go ti picture position
-        self.group.set_pose_target(self.picture)
-        success, traj, p_time, errorcode = self.group.plan()
-
-        self.group.execute(traj, wait=True)
-        self.group.stop()                                  
-        self.group.clear_pose_targets()
-        rospy.loginfo('moved to picture position')
-
-        # self.home_position()
-        # self.first_position()
+        self.home_position()
+        self.first_position()
 
         ## call service to take first picture
         rospy.wait_for_service('generate_pc/save_pc')
@@ -126,7 +108,7 @@ class MoveGroupPythonInterface(object):
 
     def reset_callback(self, req):
         """ reset service callback
-            returns the robot to the defined home position
+            returns the robot to the first scanning position
 
             args:
                 none
@@ -134,13 +116,8 @@ class MoveGroupPythonInterface(object):
             returns:
                 EmptyResponse
         """
-        self.home_position()
+        # self.home_position()
         self.first_position()
-        # self.group.set_pose_target(self.home)
-        # success, traj, p_time, errorcode = self.group.plan()
-        # self.group.execute(traj, wait=True)
-        # self.group.stop()                                  
-        # self.group.clear_pose_targets()
         rospy.wait_for_service('generate_pc/save_pc')
         self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
         self.next_pub.publish(String('turtle'))
@@ -186,7 +163,7 @@ class MoveGroupPythonInterface(object):
 
     def home_position(self):
         """
-        Moves robot to home position
+        Moves robot to pre-defined home position
         """
         self.group.set_pose_target(self.home)
         success, traj, p_time, errorcode = self.group.plan()
@@ -199,6 +176,7 @@ class MoveGroupPythonInterface(object):
     def first_position(self):
         """
         Moves robot to first camera position
+        Side of turtlebot
         """
         self.group.set_pose_target(self.picture)
         success, traj, p_time, errorcode = self.group.plan()
