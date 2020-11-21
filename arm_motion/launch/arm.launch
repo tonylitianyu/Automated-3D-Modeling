@@ -1,6 +1,4 @@
 <launch>
-    <!-- <arg name="fake_node" default="n" /> -->
-    <!-- <rosparam command="load" file="$(find arm_move)/config/waypoints.yaml" /> -->
 
     <include file="$(find sawyer_moveit_config)/launch/sawyer_moveit.launch">
       <arg name="electric_gripper" default="true"/>
@@ -12,12 +10,7 @@
 
     <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
 
+    <!-- <env name="TURTLEBOT3_MODEL" value="burger" /> -->
     <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
-
-    <!-- <include file="$(find arm_motion)/launch/turtlebot.launch"/> -->
-
-
-      
-    
 
 </launch>
