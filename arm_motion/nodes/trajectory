@@ -2,19 +2,13 @@
 
 """ 
 This node controls the turtblebot
-
 PUBLISHERS:
   + <cmd_vel> (<Twist>) ~ the velocity of the turtlebot
-
-
 BROADCASTS:
   + <tf_static> (<StaticTransformBroadcaster>) ~ Transform odom frame in world frame
-
-
 SERVICES:
   + <pause> (<Empty>) ~ stop the turtle's motion (not resetting)
   + <resume> (<Empty>) ~ resume the turtle's motion along the trajectory
-
  
 """
 
@@ -35,7 +29,7 @@ class Trajectory:
         """
         #trajectory time
         self.t = 0
-        self.update = False
+        self.update = True
         self.dt = 1.0/freq
         self.curr_ori_euler = []
 
@@ -64,7 +58,7 @@ class Trajectory:
                 empty (EmptyResponse) - returns empty
         """
         self.update = True
-        #self.pub_finish.publish(String('turtle'))
+        self.pub_finish.publish(String('turtle'))
         return EmptyResponse()
 
     def t_increase(self):
@@ -110,8 +104,21 @@ class TurtleBot:
         #interact with sawyer
         self.pub_finish = rospy.Publisher('next', String, queue_size=10)
         self.sub_finish = rospy.Subscriber('next', String, self.nextCallback)
+        self.timer_srv = rospy.Service("timer", Empty, self.start_timer_callback)
 
         self.pub_flag = True
+
+        self.stop_flag = True
+
+    def start_timer_callback(self,timer):
+        self.stop_flag = False
+        curr_time = rospy.get_time()
+        while (rospy.get_time()- curr_time) < 3.0:
+            self.stop_flag = False
+        self.stop_flag = True
+        return EmptyResponse()
+
+        
 
 
     def update_velocity(self):
@@ -124,29 +131,39 @@ class TurtleBot:
         # temp_goal = self.scan_side_arr[self.curr_scan_idx]
         # if temp_goal < 0:
         #     temp_goal = math.pi+(temp_goal-math.pi)
-        goal_ori = self.scan_side_arr[self.curr_scan_idx]
-        if goal_ori > math.pi:
-            goal_ori = -(math.pi-(goal_ori-math.pi))
 
-        if abs(self.curr_ori_euler[2] - goal_ori) > 0.1:
+        # goal_ori = self.scan_side_arr[self.curr_scan_idx]
+        # if goal_ori > math.pi:
+        #     goal_ori = -(math.pi-(goal_ori-math.pi))
+        # rospy.loginfo(abs(self.curr_ori_euler[2] - goal_ori))
+        # if abs(self.curr_ori_euler[2] - goal_ori) > 0.3:
+        #     v = 0.0
+        #     omega = 0.5
+        # else:
+        #     if self.pub_flag == True:
+        #         self.pub_flag = False
+        #         # self.pub_finish.publish(String("sawyer"))
+        #         if self.curr_scan_idx == self.scan_side:
+        #             self.pub_finish.publish(String("sawyer"))
+        #         else:
+        #             self.pub_finish.publish(String("camera"))
+        #     v = 0.0
+        #     omega = 0.0
+        if self.stop_flag == False:
             v = 0.0
             omega = 0.5
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
         else:
-            if self.pub_flag == True:
-                self.pub_flag = False
-                if self.curr_scan_idx == self.scan_side:
-                    self.pub_finish.publish(String("sawyer"))
-                else:
-                    self.pub_finish.publish(String("camera"))
-                
             v = 0.0
             omega = 0.0
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
         
-
-        vel = Twist()
-        vel.linear.x = v
-        vel.angular.z = omega
-        self.pub_vel.publish(vel)
 
     def odomCallback(self, data):
         #curr_pos = data.pose.pose.position
@@ -197,3 +214,4 @@ if __name__ == '__main__':
         main()
     except rospy.ROSInterruptException:
         pass
+

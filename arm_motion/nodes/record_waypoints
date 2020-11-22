@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+
+                    self.pub_finish.publish(String("camera"))#!/usr/bin/env python3
 
 import sys
 import copy
@@ -98,32 +99,8 @@ class MoveGroupPythonInterface(object):
         self.picture.orientation.w = self.scan_w_o[1]
         rospy.loginfo('saved first picture pose')
 
-<<<<<<< HEAD
-        ## got to home position
-
-        self.group.set_pose_target(self.home)
-        success, traj, p_time, errorcode = self.group.plan()
-    
-        self.group.execute(traj, wait=True)
-        self.group.stop()                                  
-        self.group.clear_pose_targets()
-        rospy.loginfo('moved to home')
-
-        # go to picture position
-        self.group.set_pose_target(self.picture)
-        success, traj, p_time, errorcode = self.group.plan()
-
-        self.group.execute(traj, wait=True)
-        self.group.stop()                                  
-        self.group.clear_pose_targets()
-        rospy.loginfo('moved to picture position')
-
-        # self.home_position()
-        # self.first_position()
-=======
         self.home_position()
         self.first_position()
->>>>>>> 19bd9d7f8797960780a419eebb73f26ab1a39fd8
 
         ## call service to take first picture
         rospy.wait_for_service('generate_pc/save_pc')
