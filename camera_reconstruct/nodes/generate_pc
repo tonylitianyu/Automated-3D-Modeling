@@ -26,7 +26,8 @@ class GeneratePC:
         self.pc_list = []               #list of saved pointclouds
 
         #initialize subscribers
-        rospy.Subscriber('pc',PointCloud2,self.pc_callback)
+        rospy.sleep(5)
+        rospy.Subscriber('/camera/depth/color/points',PointCloud2,self.pc_callback)
 
         #initialize publishers
         self.pc_pub = rospy.Publisher('saved_pcs',PointCloud2,queue_size=10,latch=True)
@@ -49,6 +50,35 @@ class GeneratePC:
         self.cam_odom_tf.transform.rotation.z = q[2]
         self.cam_odom_tf.transform.rotation.w = q[3]
         self.static_broadcaster.sendTransform(self.cam_odom_tf)
+
+        # create static transform from ee to camera
+        # self.ee_cam_tf = TransformStamped()
+        # self.ee_cam_tf.header.stamp = rospy.Time.now()
+        # self.ee_cam_tf.header.frame_id = 'right_hand_gripper_tip'
+        # self.ee_cam_tf.child_frame_id = 'camera_link'
+        # q = transformations.quaternion_from_euler(0,0,0)
+        # self.ee_cam_tf.transform.translation.x = 0
+        # self.ee_cam_tf.transform.translation.y = 0
+        # self.ee_cam_tf.transform.translation.z = 0
+        # self.ee_cam_tf.transform.rotation.x = q[0]
+        # self.ee_cam_tf.transform.rotation.y = q[1]
+        # self.ee_cam_tf.transform.rotation.z = q[2]
+        # self.ee_cam_tf.transform.rotation.w = q[3]
+        # self.static_broadcaster.sendTransform(self.ee_cam_tf)
+
+        # self.ee_cam_tf = TransformStamped()
+        # self.ee_cam_tf.header.stamp = rospy.Time.now()
+        # self.ee_cam_tf.header.frame_id = 'camera_depth_optical_frame'
+        # self.ee_cam_tf.child_frame_id = 'odom'
+        # q = transformations.quaternion_from_euler(0,0,0)
+        # self.ee_cam_tf.transform.translation.x = 1.12
+        # self.ee_cam_tf.transform.translation.y = 0
+        # self.ee_cam_tf.transform.translation.z = 0.355
+        # self.ee_cam_tf.transform.rotation.x = q[0]
+        # self.ee_cam_tf.transform.rotation.y = q[1]
+        # self.ee_cam_tf.transform.rotation.z = q[2]
+        # self.ee_cam_tf.transform.rotation.w = q[3]
+        # self.static_broadcaster.sendTransform(self.ee_cam_tf)
 
         #initialize transform listener
         self.tf_buffer = tf2_ros.Buffer()
