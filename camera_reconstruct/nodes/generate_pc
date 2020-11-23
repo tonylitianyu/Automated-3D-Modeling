@@ -69,7 +69,9 @@ class GeneratePC:
         except tf2.ExtrapolationException as ex:
             rospy.logwarn(ex)
             return
-        cloud_out = do_transform_cloud(pc, trans)
+
+
+        cloud_out = do_transform_cloud(pc, m)
 
         #update attribute
         self.cur_pc = cloud_out
