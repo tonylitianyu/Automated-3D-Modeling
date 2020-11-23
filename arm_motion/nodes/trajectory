@@ -95,6 +95,7 @@ class TurtleBot:
         self.scan_side = scan_side
         self.curr_scan_idx = 0
         self.scan_side_arr = []
+        self.timer_arr = [1.45,1.50,1.55,1.6]
         for i in range(self.scan_side):
             step = 2*math.pi/self.scan_side
             self.scan_side_arr.append(i*step)
@@ -113,13 +114,14 @@ class TurtleBot:
     def start_timer_callback(self,timer):
         self.stop_flag = False
         curr_time = rospy.get_time()
-        while (rospy.get_time()- curr_time) < 3.0:
+        while (rospy.get_time()- curr_time) < self.timer_arr[self.curr_scan_idx]:
             self.stop_flag = False
         self.stop_flag = True
+        self.curr_scan_idx += 1
+        if self.curr_scan_idx > self.scan_side:
+            self.curr_scan_idx = 0
+        self.pub_finish.publish(String("camera"))
         return EmptyResponse()
-
-        
-
 
     def update_velocity(self):
         """Publishing new calculated velocity to <cmd_vel>

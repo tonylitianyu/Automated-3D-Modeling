@@ -1,5 +1,4 @@
-
-                    self.pub_finish.publish(String("camera"))#!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import sys
 import copy
@@ -63,12 +62,16 @@ class MoveGroupPythonInterface(object):
 
         ## initilize service
         self.reset = rospy.Service("reset", Empty, self.reset_callback)
+        self.reset_serv = rospy.ServiceProxy('reset', Empty)
         self.step = rospy.Service("step", Step, self.step_callback)
         self.follow = rospy.Service("follow", Empty, self.follow_callback)
+        self.turtle = rospy.ServiceProxy('timer', Empty)
+        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
 
         ## initilize publisher and subscriber
-        self.next_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
-        self.next_pub = rospy.Publisher('/next', String, queue_size=10)
+        self.next_sub = rospy.Subscriber('next', String, self.arm_action_callback)
+        self.next_pub = rospy.Publisher('next', String, queue_size=10)
+        self.debug_pub = rospy.Publisher('debug', String, queue_size=10)
 
         ## store three target positions into waypoints
         self.scan_x = rospy.get_param('/waypoints/x')
@@ -103,9 +106,9 @@ class MoveGroupPythonInterface(object):
         self.first_position()
 
         ## call service to take first picture
-        rospy.wait_for_service('generate_pc/save_pc')
-        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
-        self.next_pub.publish(String('turtle'))
+        # rospy.wait_for_service('generate_pc/save_pc')
+        # self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+        # self.next_pub.publish(String('camera'))
 
     def reset_callback(self, req):
         """ reset service callback
@@ -121,7 +124,10 @@ class MoveGroupPythonInterface(object):
         self.first_position()
         rospy.wait_for_service('generate_pc/save_pc')
         self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
-        self.next_pub.publish(String('turtle'))
+        rospy.sleep(2)  # set delay for taking pictures
+
+        rospy.wait_for_service('timer')
+        self.turtle = rospy.ServiceProxy('timer', Empty)
 
         return EmptyResponse()
 
@@ -131,36 +137,41 @@ class MoveGroupPythonInterface(object):
         # print(req == String('sawyer'))
         
         if req == String('camera'):
+            self.debug_pub.publish(String('start take picture'))
             rospy.wait_for_service('generate_pc/save_pc')
-            self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+            self.pc()
             rospy.sleep(2)  # set delay for taking pictures
-            
+            self.debug_pub.publish(String('picture taken'))
             self.count = self.count + 1
-            if self.count <= 4:
-                pub = String('turtle')
-                self.next_pub.publish(pub)
+            if self.count <= 3:
+                self.debug_pub.publish(String('calling timer'))
+                # rospy.wait_for_service('timer')
+                self.turtle()
+                # pub = String('turtle')
+                # self.next_pub.publish(pub)
             else:
-                self.count = 0 
-                pass
+                self.count = 0
+                p = Pose()
+                p.orientation.x = self.scan_x_o[2]
+                p.orientation.y = self.scan_y_o[2]
+                p.orientation.z = self.scan_z_o[2]
+                p.orientation.w = self.scan_w_o[2]
+                p.position.x = self.scan_x[2]
+                p.position.y = self.scan_y[2]
+                p.position.z = self.scan_z[2]
 
-        if req == String('sawyer'):
-            p = Pose()
-            p.orientation.x = self.scan_x_o[2]
-            p.orientation.y = self.scan_y_o[2]
-            p.orientation.z = self.scan_z_o[2]
-            p.orientation.w = self.scan_w_o[2]
-            p.position.x = self.scan_x[2]
-            p.position.y = self.scan_y[2]
-            p.position.z = self.scan_z[2]
+                self.group.set_pose_target(p)
+                success, traj, p_time, errorcode = self.group.plan()
+                self.group.execute(traj, wait=True)
+                self.group.stop()                                  
+                self.group.clear_pose_targets()
 
-            self.group.set_pose_target(p)
-            success, traj, p_time, errorcode = self.group.plan()
-            self.group.execute(traj, wait=True)
-            self.group.stop()                                  
-            self.group.clear_pose_targets()
+                rospy.wait_for_service('generate_pc/save_pc')
+                self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+                rospy.sleep(6)  # set delay for taking pictures
 
-            pub = String('camera')
-            self.next_pub.publish(pub)
+                # self.reset_serv()
+                # self.turtle()
 
     def home_position(self):
         """
