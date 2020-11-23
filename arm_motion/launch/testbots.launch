@@ -1,69 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-    <group if="0" ns="sawyer">
-        <param name="tf_prefix" value="sawyer" />
-        <!-- <rosparam file="$(find YOUR_PACKAGE)/config/control.yaml" command="load" ns="/robot1" />  -->
-        <arg name="sawyer_description" default="sawyer_description"/>
-        <rosparam file="$(find sawyer_moveit_config)/config/joint_limits.yaml" command="load" ns="$(arg sawyer_description)_planning"/>
-        <rosparam file="$(find sawyer_moveit_config)/config/kinematics.yaml" command="load" ns="$(arg sawyer_description)_kinematics"/>
-        <!-- added the .xacro below -->
-        <param name="sawyer_description" command="$(find xacro)/xacro $(find sawyer_description)/urdf/sawyer.urdf.xacro"/> 
-            <node name="urdf_spawner_1" pkg="gazebo_ros" type="spawn_model"
-                args="-z 1.0 -unpause -urdf -model robot1 -param sawyer_description " respawn="false" output="screen">
-            </node>
-            <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher_1">
-                <param name="publish_frequency" type="double" value="30.0" />
-            </node>
-            <arg name="rviz_config" default="$(find sawyer_moveit_config)/launch/moveit.rviz" />
-            <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1 0 0 0 0 0 1 sawyer_description world 100" />
-            <!-- <node name="robot1_controller_spawner" pkg="controller_manager" type="spawner" 
-                args="DASHDASHnamespace=/robot1
-                joint_state_controller
-                tri_wheel_controller
-                arm_controller
-                DASHDASHshutdown-timeout 3">
-            </node> -->
-            <arg name="electric_gripper" default="false"/>
-            <arg name="tip_name" default="right_hand"/>
-            <!-- <arg name="controller_box" default="true"/> -->
-            <!-- <param name="sawyer_description_semantic"
-            command="$(find xacro)/xacro DASHDASHinorder $(find sawyer_moveit_config)/srdf/sawyer.srdf.xacro
-                electric_gripper:=$(arg electric_gripper)
-                tip_name:=$(arg tip_name)
-                controller_box:=$(arg controller_box)"/> -->
-
-            <!-- <node name="rqt_robot_steering1" pkg="rqt_robot_steering" type="rqt_robot_steering">
-                <param name="default_topic" value="/robot1/tri_wheel_controller/cmd_vel"/>
-            </node> -->
-    </group>
     <include file="$(find sawyer_gazebo)/launch/sawyer_world.launch" />
     <group ns="turtlebot3">
         <param name="tf_prefix" value="turtlebot3" />
         <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
-        <!-- <rosparam file="$(find YOUR_PACKAGE)/config/control.yaml" command="load" ns="/robot1" />  -->
         <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
             <node name="urdf_spawner_2" pkg="gazebo_ros" type="spawn_model"
                 args="-z 1.0 -unpause -urdf -model turtlebot3_burger -param /turtlebot3/robot_description " respawn="false" output="screen">
             </node>
-
             <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher_2">
-                <!-- <param name="publish_frequency" type="double" value="30.0" /> -->
                 <param name="publish_frequency" type="double" value="50.0" />
             </node>
             <arg name="rviz_config" default="$(find turtlebot3_gazebo)/rviz/turtlebot3_gazebo_model.rviz" />
-            <!-- <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="1 0 0 0 0 0 1 turtlebot3_description world 100" /> -->
+            <!-- edit x, y, z values to spawn Turtlebot in correct location relative to Sawyer -->
             <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="1 1 1 0 0 0 1 /turtlebot3/robot_description world 100" />
-            <!-- <node name="robot1_controller_spawner" pkg="controller_manager" type="spawner" 
-                args="DASHDASHnamespace=/robot1
-                joint_state_controller
-                tri_wheel_controller
-                arm_controller
-                DASHDASHshutdown-timeout 3">
-            </node> -->
-
-            <!-- <node name="rqt_robot_steering1" pkg="rqt_robot_steering" type="rqt_robot_steering">
-                <param name="default_topic" value="/robot1/tri_wheel_controller/cmd_vel"/>
-            </node> -->
     </group>
-    <!-- <node name="rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(find xxx)/config/xxx.rviz"/> -->
 </launch>
