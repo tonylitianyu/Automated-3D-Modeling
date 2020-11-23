@@ -95,7 +95,7 @@ class TurtleBot:
         self.scan_side = scan_side
         self.curr_scan_idx = 0
         self.scan_side_arr = []
-        self.timer_arr = [1.6,1.7,1.8,1.9]
+        self.timer_arr = [3.2,3.4,3.6,3.8]
         for i in range(self.scan_side):
             step = 2*math.pi/self.scan_side
             self.scan_side_arr.append(i*step)
