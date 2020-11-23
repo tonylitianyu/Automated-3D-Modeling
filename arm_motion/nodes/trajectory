@@ -37,7 +37,7 @@ class Trajectory:
         self.pause_srv = rospy.Service("pause", Empty, self.pause_callback)
         self.resume_srv = rospy.Service("resume", Empty, self.resume_callback)
 
-        self.pub_finish = rospy.Publisher('next', String, queue_size=10)
+        self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
 
     def pause_callback(self,emp):
         """Callback function to pause tje robot for the <pause> service
@@ -89,7 +89,7 @@ class TurtleBot:
         self.broadcaster = tf2_ros.TransformBroadcaster()
 
         #init publisher
-        self.pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size = 10)
+        self.pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size = 10)
         self.sub_odom = rospy.Subscriber('odom', Odometry, self.odomCallback)
 
         self.scan_side = scan_side
@@ -103,8 +103,8 @@ class TurtleBot:
         self.scan_side_arr.append(0)
 
         #interact with sawyer
-        self.pub_finish = rospy.Publisher('next', String, queue_size=10)
-        self.sub_finish = rospy.Subscriber('next', String, self.nextCallback)
+        self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
+        self.sub_finish = rospy.Subscriber('/next', String, self.nextCallback)
         self.timer_srv = rospy.Service("timer", Empty, self.start_timer_callback)
 
         self.pub_flag = True
@@ -118,8 +118,9 @@ class TurtleBot:
             self.stop_flag = False
         self.stop_flag = True
         self.curr_scan_idx += 1
-        if self.curr_scan_idx > self.scan_side:
+        if self.curr_scan_idx >= self.scan_side:
             self.curr_scan_idx = 0
+            self.stop_flag = True
         self.pub_finish.publish(String("camera"))
         return EmptyResponse()
 

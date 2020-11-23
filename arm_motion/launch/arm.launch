@@ -14,9 +14,7 @@
 
     <!-- Added this to try running turtlebot node and sawyer node concurrently -->
     <!-- <env name="TURTLEBOT3_MODEL" value="burger" /> -->
-<!--     
-    <group ns="turtle">
-        <include file="$(find arm_motion)/launch/turtlebot.launch"/>
-    </group> -->
+
+    <include file="$(find arm_motion)/launch/turtlebot.launch"/>
 
 </launch>

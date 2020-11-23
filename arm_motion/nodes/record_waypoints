@@ -65,13 +65,13 @@ class MoveGroupPythonInterface(object):
         self.reset_serv = rospy.ServiceProxy('reset', Empty)
         self.step = rospy.Service("step", Step, self.step_callback)
         self.follow = rospy.Service("follow", Empty, self.follow_callback)
-        self.turtle = rospy.ServiceProxy('timer', Empty)
+        self.turtle = rospy.ServiceProxy('turtle/timer', Empty)
         self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
 
         ## initilize publisher and subscriber
-        self.next_sub = rospy.Subscriber('next', String, self.arm_action_callback)
-        self.next_pub = rospy.Publisher('next', String, queue_size=10)
-        self.debug_pub = rospy.Publisher('debug', String, queue_size=10)
+        self.next_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
+        self.next_pub = rospy.Publisher('/next', String, queue_size=10)
+        self.debug_pub = rospy.Publisher('/debug', String, queue_size=10)
 
         ## store three target positions into waypoints
         self.scan_x = rospy.get_param('/waypoints/x')
@@ -126,8 +126,9 @@ class MoveGroupPythonInterface(object):
         self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
         rospy.sleep(2)  # set delay for taking pictures
 
-        rospy.wait_for_service('timer')
-        self.turtle = rospy.ServiceProxy('timer', Empty)
+        # rospy.wait_for_service('timer')
+        self.turtle()
+        # self.turtle = rospy.ServiceProxy('timer', Empty)
 
         return EmptyResponse()
 
@@ -170,7 +171,7 @@ class MoveGroupPythonInterface(object):
                 self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
                 rospy.sleep(6)  # set delay for taking pictures
 
-                # self.reset_serv()
+                self.reset_serv()
                 # self.turtle()
 
     def home_position(self):
