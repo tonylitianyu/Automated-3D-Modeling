@@ -3,13 +3,13 @@
     <!-- launch realsense pointcloud node-->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="filters" value="pointcloud"/>
-        <arg name='clip_distance' value='0.7'/>
+        <!-- <arg name='clip_distance' value='0.7'/> -->
     </include>
 
     <!-- Commented out to remove conflict with turtlebot.launch  -->
     <!-- launch turtlebot -->
-    <!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/> -->
-    <!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/> -->
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
     <!-- <param name='/robot_state_publisher/publish_frequency' value='500.0' /> -->
 
     <!-- launch rviz -->
@@ -17,7 +17,7 @@
 
     <!-- launch generate_pc node -->
     <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen'>
-        <remap from='pc' to='/camera/depth/color/points' />
+        <!-- <remap from='pc' to='/camera/depth/color/points' /> -->
     </node>
 
     <!-- launch fuse_pc node -->

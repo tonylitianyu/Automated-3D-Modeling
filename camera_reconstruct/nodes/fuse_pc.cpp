@@ -16,12 +16,12 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         ros::Subscriber pcsub;
         ros::Publisher pcpub;
         sensor_msgs::PointCloud2 pcfused;
-        float minX = -0.1;
-        float minY = -0.1;
-        float minZ = -0.1;
-        float maxX = 0.1;
-        float maxY = 0.1;
-        float maxZ = 0.1;
+        float minX = -0.2;
+        float minY = -0.2;
+        float minZ = -0.2;
+        float maxX = 0.2;
+        float maxY = 0.2;
+        float maxZ = 0.2;
 
     public:
         FusePC(ros::NodeHandle *nh)
@@ -46,7 +46,7 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
             pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
             pcl::PCLPointCloud2 cloud_filtered;
 
-            pcl_conversions::toPCL(PCmsg, *cloud);
+            pcl_conversions::toPCL(pcfused, *cloud);
             pcl::CropBox<pcl::PCLPointCloud2> cropFilter;
             cropFilter.setInputCloud(cloudPtr);
             cropFilter.setMin(Eigen::Vector4f(minX,minY,minZ,1.0));
