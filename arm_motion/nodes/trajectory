@@ -95,7 +95,7 @@ class TurtleBot:
         self.scan_side = scan_side
         self.curr_scan_idx = 0
         self.scan_side_arr = []
-        self.timer_arr = [1.45,1.50,1.55,1.6]
+        self.timer_arr = [1.6,1.7,1.8,1.9]
         for i in range(self.scan_side):
             step = 2*math.pi/self.scan_side
             self.scan_side_arr.append(i*step)
@@ -111,13 +111,19 @@ class TurtleBot:
 
         self.stop_flag = True
 
-
-        self.curr_time = 0.0
-
-        self.next_flag = False
-
     def start_timer_callback(self,timer):
-        self.curr_time = rospy.get_time()
+        self.stop_flag = False
+        curr_time = rospy.get_time()
+        while (rospy.get_time()- curr_time) <= self.timer_arr[self.curr_scan_idx]:
+            self.stop_flag = False
+        self.stop_flag = True
+        self.curr_scan_idx += 1
+        if self.curr_scan_idx > self.scan_side:
+            self.curr_scan_idx = 0
+        if self.curr_scan_idx == self.scan_side:
+            pass
+        else:
+            self.pub_finish.publish(String("camera"))
         return EmptyResponse()
 
     def update_velocity(self):
@@ -148,37 +154,20 @@ class TurtleBot:
         #             self.pub_finish.publish(String("camera"))
         #     v = 0.0
         #     omega = 0.0
-        if (rospy.get_time() - self.curr_time) < self.timer_arr[self.curr_scan_idx]:
-            self.stop_flag = False
-        else:
-            self.stop_flag = True
-
-
-        v = 0.0
-        omega = 0.0
         if self.stop_flag == False:
             v = 0.0
             omega = 0.5
-            self.next_flag = True
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
         else:
             v = 0.0
             omega = 0.0
-            self.next_face()
-
-
-        vel = Twist()
-        vel.linear.x = v
-        vel.angular.z = omega
-        self.pub_vel.publish(vel)
-
-    def next_face(self):
-
-        if self.next_flag == True:
-            self.next_flag = False
-            self.curr_scan_idx += 1
-            if self.curr_scan_idx >= self.scan_side:
-                self.curr_scan_idx = 0
-            self.pub_finish.publish(String("camera"))
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
         
 
     def odomCallback(self, data):

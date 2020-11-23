@@ -123,19 +123,16 @@ class MoveGroupPythonInterface(object):
         # self.home_position()
         self.first_position()
         rospy.wait_for_service('generate_pc/save_pc')
-        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+        self.pc()
         rospy.sleep(2)  # set delay for taking pictures
 
         # rospy.wait_for_service('timer')
         self.turtle()
-        # self.turtle = rospy.ServiceProxy('timer', Empty)
 
         return EmptyResponse()
 
     def arm_action_callback(self, req):
         rospy.loginfo(req)
-        # print('ARM ACTION CALLBACK')
-        # print(req == String('sawyer'))
         
         if req == String('camera'):
             self.debug_pub.publish(String('start take picture'))
