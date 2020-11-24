@@ -3,6 +3,8 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "pcl_conversions/pcl_conversions.h"
 #include <pcl/filters/crop_box.h>
+#include <pcl/registration/icp.h>
+#include <pcl/registration/registration.h>
 
 
 class FusePC
@@ -15,6 +17,8 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
     private:
         ros::Subscriber pcsub;
         ros::Publisher pcpub;
+        ros::Subscriber pcICPsub;
+        ros::Publisher pcICPpub;
         sensor_msgs::PointCloud2 pcfused;
         float minX = -0.2;
         float minY = -0.2;
@@ -23,6 +27,8 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         float maxY = 0.2;
         float maxZ = 0.2;
 
+        pcl::PCLPointCloud2 *front; 
+
     public:
         FusePC(ros::NodeHandle *nh)
         /*
@@ -30,8 +36,13 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         initializes subscriber and publisher
         */
         {
+            // pcICPsub = nh->subscribe("/icp",1000,&FusePC::icp,this);
+            // pcICPpub = nh->advertise<sensor_msgs::PointCloud2>("/icp_finished", 10, true); 
+
             pcsub = nh->subscribe("/saved_pcs",1000,&FusePC::fusion,this);
             pcpub = nh->advertise<sensor_msgs::PointCloud2>("/fused_pc", 10, true); 
+
+            front = new pcl::PCLPointCloud2;
         }
         void fusion(const sensor_msgs::PointCloud2 PCmsg)
         /*
@@ -40,6 +51,7 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         publishes fused PointCloud2 message to /fused_pc
         */
         {
+
             pcl::concatenatePointCloud(pcfused, PCmsg, pcfused);
 
             pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2; 
@@ -58,6 +70,37 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
 
             pcpub.publish(output);
         }
+
+
+        // void icp(const sensor_msgs::PointCloud2 curr)
+        // {
+        //     using ICP=pcl::IterativeClosestPoint<pcl::PCLPointCloud2, pcl::PCLPointCloud2>;
+        //     ICP icp;
+        //     // Set the input source and target
+            
+
+        //     ICP::PointCloudTargetConstPtr front_cloudPtr(front);
+
+        //     pcl::PCLPointCloud2* curr_cloud = new pcl::PCLPointCloud2; 
+        //     pcl_conversions::toPCL(curr, *curr_cloud);
+        //     pcl::PCLPointCloud2ConstPtr curr_cloudPtr(curr_cloud);
+            
+            
+
+        //     icp.setInputCloud (curr_cloudPtr);
+        //     icp.setInputTarget (front_cloudPtr);
+        //     icp.setMaxCorrespondenceDistance (0.05);
+        //     icp.setMaximumIterations (50);
+        //     icp.setTransformationEpsilon (1e-8);
+        //     icp.setEuclideanFitnessEpsilon (1);
+
+
+        //     pcl::PCLPointCloud2* cloud_rg = new pcl::PCLPointCloud2;
+        //     ICP::PointCloudSourcePtr cloud_rgPtr(cloud_rg);
+        //     //pcl::PointCloud<pcl::PointXYZ> cloud_registered;
+        //     icp.align(*cloud_rgPtr);
+        //     //Eigen::Matrix4f transformation = icp.getFinalTransformation ();
+        // }
 
 
 
