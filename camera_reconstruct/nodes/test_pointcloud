@@ -6,7 +6,6 @@ import sys
 import rospy
 import unittest
 import rostest
-# import camera_reconstruct
 from camera_reconstruct.srv import save_pc
 from sensor_msgs.msg import PointCloud2
 
