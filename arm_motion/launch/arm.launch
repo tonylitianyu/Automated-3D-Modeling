@@ -12,9 +12,6 @@
 
     <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
 
-    <!-- Added this to try running turtlebot node and sawyer node concurrently -->
-    <!-- <env name="TURTLEBOT3_MODEL" value="burger" /> -->
-
     <include file="$(find arm_motion)/launch/turtlebot.launch"/>
 
 </launch>
