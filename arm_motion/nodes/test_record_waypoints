@@ -6,23 +6,23 @@ import sys
 import rospy
 import unittest
 import rostest
+from std_msgs.msg import String, Bool, Int16
 import arm_motion
-from record_waypoints import MoveGroupPythonInterface as m
-
+from arm_motion.record_waypoints import MoveGroupPythonInterface as m
 
 class TestRecordWaypoints(unittest.TestCase):
     def __init__(self, *args):
         """Init a test class for record_waypoints node
         """
         super(TestRecordWaypoints, self).__init__(*args)
-        count = 0
-        test = String('camera')
+        self.count = 0
+        self.test = String('camera')
         
 
     
     def test_arm_action_callback(self, req):
-        if req == test:
-            self.assertEqual(count,1)
+        if req == self.test:
+            self.assertEqual(self.count,1)
 
     
 
