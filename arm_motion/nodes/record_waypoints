@@ -31,7 +31,7 @@ class MoveGroupPythonInterface(object):
         group_name = "right_arm"
         self.group = moveit_commander.MoveGroupCommander(robot_description='/robot_description', name=group_name)
         self.group.set_max_velocity_scaling_factor(1) # increase robot joint speeds
-        #self.group.set_planner_id('LBKPIECE')
+
         display_trajectory_publisher = rospy.Publisher("move_group/display_planned_path",
                                                         moveit_msgs.msg.DisplayTrajectory,
                                                         queue_size=20)
@@ -63,6 +63,7 @@ class MoveGroupPythonInterface(object):
         ## initilize service
         self.reset = rospy.Service("reset", Empty, self.reset_callback)
         self.reset_serv = rospy.ServiceProxy('reset', Empty)
+        self.start = rospy.Service("start", Empty, self.start_callback)
         self.step = rospy.Service("step", Step, self.step_callback)
         self.follow = rospy.Service("follow", Empty, self.follow_callback)
         self.turtle = rospy.ServiceProxy('turtle/timer', Empty)
@@ -106,11 +107,6 @@ class MoveGroupPythonInterface(object):
         self.first_position()
         self.pc()
 
-        ## call service to take first picture
-        # rospy.wait_for_service('generate_pc/save_pc')
-        # self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
-        # self.next_pub.publish(String('camera'))
-
     def reset_callback(self, req):
         """ reset service callback
             returns the robot to the first scanning position
@@ -132,6 +128,10 @@ class MoveGroupPythonInterface(object):
 
         return EmptyResponse()
 
+    def start_callback(self, req):
+        self.next_pub.publish(String('camera'))
+        return EmptyResponse()
+
     def arm_action_callback(self, req):
         rospy.loginfo(req)
         
@@ -151,25 +151,25 @@ class MoveGroupPythonInterface(object):
                 # pub = String('turtle')
                 # self.next_pub.publish(pub)
             else:
-                # self.count = 0
-                # p = Pose()
-                # p.orientation.x = self.scan_x_o[2]
-                # p.orientation.y = self.scan_y_o[2]
-                # p.orientation.z = self.scan_z_o[2]
-                # p.orientation.w = self.scan_w_o[2]
-                # p.position.x = self.scan_x[2]
-                # p.position.y = self.scan_y[2]
-                # p.position.z = self.scan_z[2]
+                self.count = 0
+                p = Pose()
+                p.orientation.x = self.scan_x_o[2]
+                p.orientation.y = self.scan_y_o[2]
+                p.orientation.z = self.scan_z_o[2]
+                p.orientation.w = self.scan_w_o[2]
+                p.position.x = self.scan_x[2]
+                p.position.y = self.scan_y[2]
+                p.position.z = self.scan_z[2]
 
-                # self.group.set_pose_target(p)
-                # success, traj, p_time, errorcode = self.group.plan()
-                # self.group.execute(traj, wait=True)
-                # self.group.stop()                                  
-                # self.group.clear_pose_targets()
+                self.group.set_pose_target(p)
+                success, traj, p_time, errorcode = self.group.plan()
+                self.group.execute(traj, wait=True)
+                self.group.stop()                                  
+                self.group.clear_pose_targets()
 
-                # rospy.wait_for_service('generate_pc/save_pc')
-                # self.pc()
-                # rospy.sleep(6)  # set delay for taking pictures
+                rospy.wait_for_service('generate_pc/save_pc')
+                self.pc()
+                rospy.sleep(6)  # set delay for taking pictures
 
                 self.reset_serv()
                 # self.turtle()
