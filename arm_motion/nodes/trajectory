@@ -79,9 +79,9 @@ class TurtleBot:
         self.world_odom_tf.header.stamp = rospy.Time.now()
         self.world_odom_tf.header.frame_id = "world"
         self.world_odom_tf.child_frame_id = "odom"
-        self.world_odom_tf.transform.translation.x = 0
+        self.world_odom_tf.transform.translation.x = 1
         self.world_odom_tf.transform.translation.y = 0
-        self.world_odom_tf.transform.translation.z = 0
+        self.world_odom_tf.transform.translation.z = -0.4
         q_world = transformations.quaternion_about_axis(0.0,[0,0,1])
         self.world_odom_tf.transform.rotation = Quaternion(*q_world)
         self.static_broadcaster.sendTransform(self.world_odom_tf)
@@ -95,7 +95,7 @@ class TurtleBot:
         self.scan_side = scan_side
         self.curr_scan_idx = 0
         self.scan_side_arr = []
-        self.timer_arr = [3.2,3.4,3.6,3.8]
+        self.timer_arr = [3.2,3.4,3.4,3.4]
         for i in range(self.scan_side):
             step = 2*math.pi/self.scan_side
             self.scan_side_arr.append(i*step)

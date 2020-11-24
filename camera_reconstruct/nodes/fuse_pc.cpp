@@ -20,12 +20,12 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         ros::Subscriber pcICPsub;
         ros::Publisher pcICPpub;
         sensor_msgs::PointCloud2 pcfused;
-        float minX = -0.2;
-        float minY = -0.2;
-        float minZ = -0.2;
-        float maxX = 0.2;
-        float maxY = 0.2;
-        float maxZ = 0.2;
+        float minX = -0.25;
+        float minY = -0.25;
+        float minZ = -0.25;
+        float maxX = 0.25;
+        float maxY = 0.25;
+        float maxZ = 0.25;
 
         pcl::PCLPointCloud2 *front; 
 
@@ -69,6 +69,7 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
             pcl_conversions::fromPCL(cloud_filtered,output);
 
             pcpub.publish(output);
+            // pcpub.publish(pcfused);
         }
 
 

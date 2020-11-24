@@ -1,3 +1,0 @@
-<launch>
-    <test test-name="test_record_waypoints" pkg="arm_motion" type="test_record_waypoints" />
-</launch>

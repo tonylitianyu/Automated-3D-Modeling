@@ -15,12 +15,14 @@ class TestRecordWaypoints(unittest.TestCase):
         """Init a test class for record_waypoints node
         """
         super(TestRecordWaypoints, self).__init__(*args)
+        count = 0
+        test = String('camera')
         
 
     
-    def test_first_position(self):
-        first = m.first_position
-        self.assertEqual(rospy.loginfo('moved to picture position'),first)
+    def test_arm_action_callback(self, req):
+        if req == test:
+            self.assertEqual(count,1)
 
     
 
