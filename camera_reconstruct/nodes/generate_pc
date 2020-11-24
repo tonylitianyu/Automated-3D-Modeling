@@ -91,11 +91,10 @@ class GeneratePC:
         updates self.cur_pc to transformed PointCloud2 message
         '''
         #Transform point cloud to odom frame
-        print(pc.header)
         try:
             # now = rospy.Time.now()
             # self.tf_buff.waitForTransform('base_scan',pc.header.frame_id, now, rospy.Duration(4.0))
-            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration(3))
+            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration(0.1))
             # trans = self.tf_listener.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp)
         except tf2.LookupException as ex:
             rospy.logwarn(ex)
@@ -105,7 +104,7 @@ class GeneratePC:
             return
 
 
-        cloud_out = do_transform_cloud(pc, m)
+        cloud_out = do_transform_cloud(pc,trans)
 
         #update attribute
         self.cur_pc = cloud_out
