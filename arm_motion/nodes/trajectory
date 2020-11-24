@@ -104,7 +104,6 @@ class TurtleBot:
 
         #interact with sawyer
         self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
-        self.sub_finish = rospy.Subscriber('/next', String, self.nextCallback)
         self.timer_srv = rospy.Service("timer", Empty, self.start_timer_callback)
 
         self.pub_flag = True
@@ -178,12 +177,10 @@ class TurtleBot:
         self.curr_ori_euler = transformations.euler_from_quaternion(q)
         #print(self.curr_ori_euler)
 
-    def nextCallback(self,data):
-        if data == String('turtle'):
-            self.curr_scan_idx += 1
-            self.pub_flag = True
-            if self.curr_scan_idx > self.scan_side:
-                self.curr_scan_idx = 0
+    def nextFace(self,data):
+        self.curr_scan_idx += 1
+        if self.curr_scan_idx >= self.scan_side:
+            self.curr_scan_idx = 0
 
 
 def main():
