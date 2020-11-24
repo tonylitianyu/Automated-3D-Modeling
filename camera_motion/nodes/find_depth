@@ -15,7 +15,7 @@ class Depth_Processor:
         self._sub = rospy.Subscriber("camera/depth/image_rect_raw", Image, self.callback)
         self._pub = rospy.Publisher("camera_motion_depth", Float32 , queue_size=10)
         self.kernel = 2 #has to be an even number
-        self.time_avg = 50
+        self.time_avg = 20
         self.time_queue = []
 
         self.helper = DepthHelper(self.time_avg, self.kernel)
