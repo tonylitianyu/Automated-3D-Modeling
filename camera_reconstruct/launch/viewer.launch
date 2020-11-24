@@ -1,24 +1,25 @@
 <launch>
+    
+    <arg name='gaz' default='false' />
+    <arg name='clip' default='false' />
 
     <!-- launch realsense pointcloud node-->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="filters" value="pointcloud"/>
-        <!-- <arg name='clip_distance' value='0.7'/> -->
+        <arg name='clip_distance' value='0.7' if='$(arg clip)'/>
     </include>
-
-    <!-- Commented out to remove conflict with turtlebot.launch  -->
-    <!-- launch turtlebot -->
-    <!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
-    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/> -->
-    <!-- <param name='/robot_state_publisher/publish_frequency' value='500.0' /> -->
+ 
+    <!-- launch turtlebot in gazebo -->
+    <group if='$(arg gaz)' >
+        <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
+        <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
+    </group>
 
     <!-- launch rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer.rviz"/>
 
     <!-- launch generate_pc node -->
-    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen'>
-        <!-- <remap from='pc' to='/camera/depth/color/points' /> -->
-    </node>
+    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' />
 
     <!-- launch fuse_pc node -->
     <node name="fuse_pc" pkg='camera_reconstruct' type='fuse_pc' output='screen'/>
