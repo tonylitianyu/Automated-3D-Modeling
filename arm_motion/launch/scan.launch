@@ -4,7 +4,7 @@
       <arg name="electric_gripper" default="true"/>
     </include>
 
-    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints" output="screen">
+    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints">
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 
@@ -12,9 +12,8 @@
 
     <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
 
-    <!-- Added this to try running turtlebot node and sawyer node concurrently -->
-    <!-- <env name="TURTLEBOT3_MODEL" value="burger" /> -->
-
-    <include file="$(find arm_motion)/launch/turtlebot.launch"/>
+    <group ns='turtle' >
+        <include file="$(find arm_motion)/launch/turtlebot.launch"/>
+    </group>
 
 </launch>

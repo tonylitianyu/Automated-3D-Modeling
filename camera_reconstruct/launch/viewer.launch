@@ -8,8 +8,8 @@
 
     <!-- Commented out to remove conflict with turtlebot.launch  -->
     <!-- launch turtlebot -->
-    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
-    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
+    <!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/> -->
     <!-- <param name='/robot_state_publisher/publish_frequency' value='500.0' /> -->
 
     <!-- launch rviz -->

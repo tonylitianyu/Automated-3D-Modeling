@@ -37,34 +37,34 @@ class GeneratePC:
 
         #initialize broadcaster and create static transform from camera to odom
         self.static_broadcaster = tf2_ros.StaticTransformBroadcaster()
-        self.cam_odom_tf = TransformStamped()
-        self.cam_odom_tf.header.stamp = rospy.Time.now()
-        self.cam_odom_tf.header.frame_id = 'camera_depth_optical_frame'
-        self.cam_odom_tf.child_frame_id = 'odom'
-        q = transformations.quaternion_from_euler(pi/2,pi/2,0)
-        self.cam_odom_tf.transform.translation.x = 0
-        self.cam_odom_tf.transform.translation.y = 0.2      #tune this
-        self.cam_odom_tf.transform.translation.z = 0.45     #tune this
-        self.cam_odom_tf.transform.rotation.x = q[0]
-        self.cam_odom_tf.transform.rotation.y = q[1]
-        self.cam_odom_tf.transform.rotation.z = q[2]
-        self.cam_odom_tf.transform.rotation.w = q[3]
-        self.static_broadcaster.sendTransform(self.cam_odom_tf)
+        # self.cam_odom_tf = TransformStamped()
+        # self.cam_odom_tf.header.stamp = rospy.Time.now()
+        # self.cam_odom_tf.header.frame_id = 'camera_depth_optical_frame'
+        # self.cam_odom_tf.child_frame_id = 'odom'
+        # q = transformations.quaternion_from_euler(pi/2,pi/2,0)
+        # self.cam_odom_tf.transform.translation.x = 0
+        # self.cam_odom_tf.transform.translation.y = 0.2      #tune this
+        # self.cam_odom_tf.transform.translation.z = 0.45     #tune this
+        # self.cam_odom_tf.transform.rotation.x = q[0]
+        # self.cam_odom_tf.transform.rotation.y = q[1]
+        # self.cam_odom_tf.transform.rotation.z = q[2]
+        # self.cam_odom_tf.transform.rotation.w = q[3]
+        # self.static_broadcaster.sendTransform(self.cam_odom_tf)
 
         # create static transform from ee to camera
-        # self.ee_cam_tf = TransformStamped()
-        # self.ee_cam_tf.header.stamp = rospy.Time.now()
-        # self.ee_cam_tf.header.frame_id = 'right_hand_gripper_tip'
-        # self.ee_cam_tf.child_frame_id = 'camera_link'
-        # q = transformations.quaternion_from_euler(0,0,0)
-        # self.ee_cam_tf.transform.translation.x = 0
-        # self.ee_cam_tf.transform.translation.y = 0
-        # self.ee_cam_tf.transform.translation.z = 0
-        # self.ee_cam_tf.transform.rotation.x = q[0]
-        # self.ee_cam_tf.transform.rotation.y = q[1]
-        # self.ee_cam_tf.transform.rotation.z = q[2]
-        # self.ee_cam_tf.transform.rotation.w = q[3]
-        # self.static_broadcaster.sendTransform(self.ee_cam_tf)
+        self.ee_cam_tf = TransformStamped()
+        self.ee_cam_tf.header.stamp = rospy.Time.now()
+        self.ee_cam_tf.header.frame_id = 'right_gripper_l_finger_tip'
+        self.ee_cam_tf.child_frame_id = 'camera_link'
+        q = transformations.quaternion_from_euler(0,3*pi/2,pi)
+        self.ee_cam_tf.transform.translation.x = 0
+        self.ee_cam_tf.transform.translation.y = 0
+        self.ee_cam_tf.transform.translation.z = 0
+        self.ee_cam_tf.transform.rotation.x = q[0]
+        self.ee_cam_tf.transform.rotation.y = q[1]
+        self.ee_cam_tf.transform.rotation.z = q[2]
+        self.ee_cam_tf.transform.rotation.w = q[3]
+        self.static_broadcaster.sendTransform(self.ee_cam_tf)
 
         # self.ee_cam_tf = TransformStamped()
         # self.ee_cam_tf.header.stamp = rospy.Time.now()
@@ -91,8 +91,12 @@ class GeneratePC:
         updates self.cur_pc to transformed PointCloud2 message
         '''
         #Transform point cloud to odom frame
+        print(pc.header)
         try:
-            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration.from_sec(0.1))
+            # now = rospy.Time.now()
+            # self.tf_buff.waitForTransform('base_scan',pc.header.frame_id, now, rospy.Duration(4.0))
+            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration(3))
+            # trans = self.tf_listener.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp)
         except tf2.LookupException as ex:
             rospy.logwarn(ex)
             return
