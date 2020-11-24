@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+"""Intergration testing for record_waypoints"""
+
+
+import sys
+import rospy
+import unittest
+import rostest
+import arm_motion
+from record_waypoints import MoveGroupPythonInterface as m
+
+
+class TestRecordWaypoints(unittest.TestCase):
+    def __init__(self, *args):
+        """Init a test class for record_waypoints node
+        """
+        super(TestRecordWaypoints, self).__init__(*args)
+        
+
+    
+    def test_first_position(self):
+        first = m.first_position
+        self.assertEqual(rospy.loginfo('moved to picture position'),first)
+
+    
+
+
+if __name__ == '__main__':
+    rostest.rosrun('arm_motion','test_motion', TestRecordWaypoints, sys.argv)
+
