@@ -6,21 +6,25 @@ import sys
 import rospy
 import unittest
 import rostest
-import camera_reconstruct
+# import camera_reconstruct
 from camera_reconstruct.srv import save_pc
 from sensor_msgs.msg import PointCloud2
 
 
 class TestPC(unittest.TestCase):
     def __init__(self, *args):
-        """Init a test class for pointcloud pipeline node
+        """
+        Init a test class for pointcloud pipeline node
         """
         super(TestPC, self).__init__(*args)
         rospy.init_node('TestPC_node')
         rospy.wait_for_service('generate_pc/save_pc')
         self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
 
-    def test_transform(self):
+    def test_pc(self):
+        '''
+        test to make sure service returns PointCloud2 message
+        '''
         mypc = self.pc()
         frame = mypc.pc.header.frame_id
         height = mypc.pc.height
