@@ -32,16 +32,9 @@ class ExportPly():
 
         self.subp = rospy.Subscriber('/fused_pc', PointCloud2, self.subback)
 
-        self.pc = rs.pointcloud()
+        #default pc
+        # self.pc = rs.pointcloud()
         # self.points = rs.points()
-        # self.pipe = rs.pipeline()
-        # self.config = rs.config()
-
-        # self.config.enable_stream(rs.stream.depth)
-        # self.pipe.start(config)
-        
-        # self.colorizer = rs.colorizer()
-
         self.pipe = rs.pipeline()
         self.config = rs.config()
 
@@ -49,10 +42,19 @@ class ExportPly():
         self.pipe.start(self.config)
         
         self.colorizer = rs.colorizer()
+
     
     def subback(self, pc2):
         #pc2 is the PointCloud2 input from /fused_pc
         self.pc = pc2
+
+        # self.pipe = rs.pipeline()
+        # self.config = rs.config()
+
+        # self.config.enable_stream(rs.stream.depth)
+        # self.pipe.start(self.config)
+        
+        # self.colorizer = rs.colorizer()
 
 
 if __name__ == "__main__":
@@ -71,7 +73,9 @@ if __name__ == "__main__":
         ply.process(colorized)
         print("Done")
 
+        ep.pipe.stop()
+        
         rospy.spin()
     finally:
-        ep.pipe.stop()
+        # ep.pipe.stop()
         pass
