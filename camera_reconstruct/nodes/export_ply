@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Export PLY Node: subscribes to /fused_pc topic, grab pointcloud2
+Publishers:
+    None
+
+Subscribers:
+    subp (PointCloud) - subscribes to the /fused_pc topic from fuse_pc.cpp
+
+Broadcasts:
+    None
+
+Services:
+    None
+
+Parameters:
+    None
+
+Exceptions:
+    None
+"""
+#  Based on:
+## License: Apache 2.0. See LICENSE file in root directory.
+## Copyright(c) 2017 Intel Corporation. All Rights Reserved.
+import pyrealsense2 as rs
+
+import rospy
+from sensor_msgs.msg import PointCloud2
+
+class ExportPly():
+    def __init__(self):
+        rospy.init_node('export_ply', anonymous='False')
+
+        self.subp = rospy.Subscriber('/fused_pc', PointCloud2, self.subback)
+
+        #default pc
+        self.pipe = rs.pipeline()
+        self.config = rs.config()
+
+        self.config.enable_stream(rs.stream.depth)
+        self.pipe.start(self.config)
+        
+        self.colorizer = rs.colorizer()
+
+    
+    def subback(self, pc2):
+        #pc2 is the PointCloud2 input from /fused_pc
+        self.pc = pc2
+
+
+if __name__ == "__main__":
+    try:
+        ep = ExportPly()
+
+        frames = ep.pipe.wait_for_frames()
+        colorized = ep.colorizer.process(frames)
+        
+        ply = rs.save_to_ply("blocked.ply")
+        ply.set_option(rs.save_to_ply.option_ply_binary, False)
+        ply.set_option(rs.save_to_ply.option_ply_normals, True)
+
+        print("Saving to blocked.ply...")
+
+        ply.process(colorized)
+        print("Done")
+
+        ep.pipe.stop()
+        
+        rospy.spin()
+    finally:
+        # ep.pipe.stop()
+        pass
