@@ -1,32 +1,31 @@
-#!/usr/bin/env python
-"""Intergration testing for mover"""
-
+#!/usr/bin/env python3
+"""Intergration testing for trajectory"""
 
 import sys
 import rospy
 import unittest
-import rostest
-import arm_motion
-from trajectory import TurtleBot
-
+from std_srvs.srv import Empty
+from std_msgs.msg import String
 
 class TestMotion(unittest.TestCase):
     def __init__(self, *args):
         """Init a test class for mover node
         """
         super(TestMotion, self).__init__(*args)
-        self.scan_side = 4
+        self.turtle = rospy.ServiceProxy("timer", Empty)
+        self.next_sub = rospy.Subscriber("/next", String, self.sub_callback)
 
-    def test_index_range(self):
-        
-        turtle = TurtleBot(self.scan_side)
-        for i in range(self.scan_side):
-            turtle.nextFace()
-        self.assertEqual(turtle.curr_scan_idx,0)
-
+    def timer_test(self):
+        self.turtle()
+        check = self.next_sub
+        self.assertTrue(check)
     
+    def sub_callback(self, req):
+        if req == String("camera"):
+            return True
 
 
 if __name__ == '__main__':
+    import rostest
     rostest.rosrun('arm_motion','test_motion', TestMotion, sys.argv)
 
