@@ -42,21 +42,22 @@ Publisher:      /fused_pc - concatenated PointCloud2 message
         {
             pcl::concatenatePointCloud(pcfused, PCmsg, pcfused);
 
-            pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2; 
-            pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
-            pcl::PCLPointCloud2 cloud_filtered;
+            // pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2; 
+            // pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+            // pcl::PCLPointCloud2 cloud_filtered;
 
-            pcl_conversions::toPCL(pcfused, *cloud);
-            pcl::CropBox<pcl::PCLPointCloud2> cropFilter;
-            cropFilter.setInputCloud(cloudPtr);
-            cropFilter.setMin(Eigen::Vector4f(minX,minY,minZ,1.0));
-            cropFilter.setMax(Eigen::Vector4f(maxX,maxY,maxZ,1.0));
+            // pcl_conversions::toPCL(pcfused, *cloud);
+            // pcl::CropBox<pcl::PCLPointCloud2> cropFilter;
+            // cropFilter.setInputCloud(cloudPtr);
+            // cropFilter.setMin(Eigen::Vector4f(minX,minY,minZ,1.0));
+            // cropFilter.setMax(Eigen::Vector4f(maxX,maxY,maxZ,1.0));
 
-            cropFilter.filter(cloud_filtered);
-            sensor_msgs::PointCloud2 output;
-            pcl_conversions::fromPCL(cloud_filtered,output);
+            // cropFilter.filter(cloud_filtered);
+            // sensor_msgs::PointCloud2 output;
+            // pcl_conversions::fromPCL(cloud_filtered,output);
 
-            pcpub.publish(output);
+            // pcpub.publish(output);
+            pcpub.publish(pcfused);
         }
 
 

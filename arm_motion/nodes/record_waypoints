@@ -138,7 +138,7 @@ class MoveGroupPythonInterface(object):
         if req == String('camera'):
             self.debug_pub.publish(String('start take picture'))
             rospy.wait_for_service('generate_pc/save_pc')
-            # pc_debug = self.pc()
+            self.pc()
             # print(pc_debug)
             # rospy.loginfo(pc_debug)
             rospy.sleep(2)  # set delay for taking pictures
