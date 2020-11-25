@@ -177,6 +177,7 @@ target_link_libraries(fuse_pc
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   nodes/generate_pc
+  nodes/generate_pc_sim
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

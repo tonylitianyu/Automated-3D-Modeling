@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+
+import rospy
+import tf2_ros
+import tf2_py as tf2
+from tf_conversions import transformations
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+from sensor_msgs.msg import PointCloud2
+from geometry_msgs.msg import TransformStamped
+from camera_reconstruct.srv import save_pc
+from math import pi
+
+class GeneratePC:
+    '''
+    Services:       save_pc - outputs a single PointCloud2 message
+    Subscribers:    /camera/depth/color/points - PointCloud2 messages from realsense
+    Publishers:     pc_pub - publishes PointCloud2 messages to /saved_pcs
+    Broadcasts:     static transfrom from camera_depth_optical_frame to odom
+    '''
+    def __init__(self):
+        '''
+        Constructor of GeneratePC class
+        initializes attributes, subscribers, broadcasters, and services
+        '''
+        #initialize attributes
+        self.cur_pc = PointCloud2()     #current pointcloud from realsense
+        self.pc_list = []               #list of saved pointclouds
+
+        #initialize subscribers
+        rospy.sleep(5)
+        rospy.Subscriber('/camera/depth/color/points',PointCloud2,self.pc_callback)
+
+        #initialize publishers
+        self.pc_pub = rospy.Publisher('saved_pcs',PointCloud2,queue_size=10,latch=True)
+
+        #initialize services
+        self.save_pc = rospy.Service('generate_pc/save_pc',save_pc,self.savepc_callback)
+
+        #initialize broadcaster and create static transform from camera to odom
+        self.static_broadcaster = tf2_ros.StaticTransformBroadcaster()
+        self.cam_odom_tf = TransformStamped()
+        self.cam_odom_tf.header.stamp = rospy.Time.now()
+        self.cam_odom_tf.header.frame_id = 'camera_depth_optical_frame'
+        self.cam_odom_tf.child_frame_id = 'odom'
+        q = transformations.quaternion_from_euler(pi/2,pi/2,0)
+        self.cam_odom_tf.transform.translation.x = 0
+        self.cam_odom_tf.transform.translation.y = 0.2      #tune this
+        self.cam_odom_tf.transform.translation.z = 0.45     #tune this
+        self.cam_odom_tf.transform.rotation.x = q[0]
+        self.cam_odom_tf.transform.rotation.y = q[1]
+        self.cam_odom_tf.transform.rotation.z = q[2]
+        self.cam_odom_tf.transform.rotation.w = q[3]
+        self.static_broadcaster.sendTransform(self.cam_odom_tf)
+
+        #initialize transform listener
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+    def pc_callback(self,pc):
+        '''
+        subscriber callback function
+        transforms most recent PointCloud2 message to odom frame
+        updates self.cur_pc to transformed PointCloud2 message
+        '''
+        #Transform point cloud to odom frame
+        try:
+            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration(0.1))
+        except tf2.LookupException as ex:
+            rospy.logwarn(ex)
+            return
+        except tf2.ExtrapolationException as ex:
+            rospy.logwarn(ex)
+            return
+
+        cloud_out = do_transform_cloud(pc,trans)
+
+        #update attribute
+        self.cur_pc = cloud_out
+
+    def savepc_callback(self,emp):
+        '''
+        save_pc callback function
+        saves PointCloud2 message in pc_list
+        args:
+            emp: empty variable
+        returns:
+            mypc: saved PointCloud2 message
+        '''
+        mypc = self.cur_pc
+        self.pc_pub.publish(mypc)
+        self.pc_list.append(mypc)
+        return mypc
+    
+def main():
+    '''
+    initialize node and create GeneratePC object
+    '''
+    rospy.init_node('generate_pc')
+    gpc = GeneratePC()
+    rospy.spin()
+
+if __name__ == "__main__":
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
