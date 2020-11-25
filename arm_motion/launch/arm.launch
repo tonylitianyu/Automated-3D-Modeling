@@ -8,6 +8,12 @@
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 
+    <arg name="align" default="false" />
+
+    <node name="find_depth" pkg="camera_motion" type="find_depth" 
+        if="$(eval arg('align') == true)">
+    </node>
+
     <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
 
     <include file="$(find camera_reconstruct)/launch/viewer.launch"/>

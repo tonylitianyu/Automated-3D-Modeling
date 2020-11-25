@@ -139,10 +139,10 @@ class MoveGroupPythonInterface(object):
         self.picture.orientation.w = self.scan_w_o[1]
         rospy.loginfo('saved first picture pose')
 
-        ## move to home pose and picture pose, take picture
+        ## move to home pose and picture pose
         self.home_position()
         self.first_position()
-        self.pc()
+        # self.pc()
 
     def start_callback(self, req):
         """ start service callback

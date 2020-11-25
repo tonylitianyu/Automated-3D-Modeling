@@ -1,0 +1,9 @@
+<launch>
+    <!-- <include file="$(find sawyer_gazebo)/launch/sawyer_world.launch" /> -->
+    <!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/> -->
+    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' >
+        <remap from='base_scan' to='turtlebot3/base_scan' />
+    </node>
+    <test test-name="test_pointcloud" pkg="camera_reconstruct" type="test_pointcloud" />
+</launch>

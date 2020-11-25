@@ -7,6 +7,7 @@ import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float32
+from camera_motion.helper import DepthHelper
 class Depth_Processor:
     """ Process the images """
     def __init__(self):
@@ -17,6 +18,8 @@ class Depth_Processor:
         self.time_avg = 50
         self.time_queue = []
 
+        self.helper = DepthHelper(self.time_avg, self.kernel)
+
     def callback(self, data):
         """ Callback for processing an image
     
@@ -25,32 +28,10 @@ class Depth_Processor:
         """
         # convert to open cv
         cv_image = self._bridge.imgmsg_to_cv2(data, "16UC1")
-        img_width = len(cv_image)
-        img_height = len(cv_image[1])
+        avg_depth_space = self.helper.spaceSmoothing(cv_image)
+        avg_depth_time = self.helper.timeSmoothing(self.time_queue, avg_depth_space)
 
-        mid_width = int(img_width/2)
-        mid_height = int(img_height/2)
-
-        depth_sum = 0
-        count_pixel = 0
-        for i in range(mid_width-int(self.kernel/2),mid_width+int(self.kernel/2)):
-            for j in range(mid_height-int(self.kernel/2),mid_height+int(self.kernel/2)):
-                count_pixel += 1
-                depth_sum += cv_image[i][j]
-
-        
-        avg_depth_space = depth_sum/count_pixel
-
-        if len(self.time_queue) >= self.time_avg:
-            self.time_queue.pop(0)
-
-        self.time_queue.append(avg_depth_space)
-
-        avg_depth_time = sum(self.time_queue)/len(self.time_queue)
-            
-
-        avg_depth = int(avg_depth_time)
-        self._pub.publish(avg_depth)
+        self._pub.publish(avg_depth_time)
 
 
 
