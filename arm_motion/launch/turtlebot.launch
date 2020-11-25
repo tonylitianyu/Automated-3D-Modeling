@@ -8,8 +8,7 @@
                 <param name="publish_frequency" type="double" value="50.0" />
                 <remap from="/turtle/joint_states" to="/joint_states" />
             </node>
-
-            <!-- <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="1 0.2 -0.2 0 0 0 1 world /turtle/robot_description 100" /> -->
+            
         <node name="trajectory" pkg="arm_motion" type="trajectory" />
     </group>
 </launch>
