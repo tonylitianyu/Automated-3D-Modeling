@@ -39,10 +39,22 @@ from camera_reconstruct.srv import save_pc
 
 class MoveGroupPythonInterface(object):
     def __init__(self):
+        """
+            - initilize the node
+            - initialize `moveit_commander`_ and a `rospy`_ node
+            - initilize variables
+            - initilize serive and service client
+            - initilize publisher and subscribers
+            - store three target positions into waypoints
+            - save home pose
+            - save first picture pose
+            - move to home pose and take first picture
+        """
         super(MoveGroupPythonInterface, self).__init__()
 
         rospy.init_node('record_waypoints', anonymous=True)
         joint_state_topic = ['joint_states:=/robot/joint_states']
+
         ## First initialize `moveit_commander`_ and a `rospy`_ node:
         moveit_commander.roscpp_initialize(joint_state_topic)
         
@@ -133,6 +145,12 @@ class MoveGroupPythonInterface(object):
         self.pc()
 
     def start_callback(self, req):
+        """ start service callback
+            start the robot
+
+            returns:
+                EmptyResponse
+        """
         self.next_pub.publish(String('camera'))
         return EmptyResponse()
 
@@ -155,6 +173,14 @@ class MoveGroupPythonInterface(object):
         return EmptyResponse()
 
     def arm_action_callback(self, req):
+        """ next_sub subscriber callback
+            input the string message camera to take pictures and 
+            then returns string message timer to make turtle turn after taking pictures.
+            After timer being published 
+
+            returns:
+                EmptyResponse
+        """
         rospy.loginfo(req)
         
         if req == String('camera'):

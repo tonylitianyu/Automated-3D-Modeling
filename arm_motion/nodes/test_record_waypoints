@@ -5,7 +5,6 @@
 import sys
 import rospy
 import unittest
-import rostest
 from std_msgs.msg import String, Bool, Int16
 import arm_motion
 from arm_motion.record_waypoints import MoveGroupPythonInterface as m
@@ -15,18 +14,21 @@ class TestRecordWaypoints(unittest.TestCase):
         """Init a test class for record_waypoints node
         """
         super(TestRecordWaypoints, self).__init__(*args)
-        self.count = 0
-        self.test = String('camera')
         
 
     
     def test_arm_action_callback(self, req):
-        if req == self.test:
-            self.assertEqual(self.count,1)
+        self.count = 0
+        self.test = String('camera')
+        ki = m.arm_action_callback(self, req==self.test)
+        self.assertEqual(self.count,1)
+
+
+
 
     
 
 
 if __name__ == '__main__':
-    rostest.rosrun('arm_motion','test_motion', TestRecordWaypoints, sys.argv)
-
+    import rosunit
+    rosunit.unitrun('arm_motion','test_motion', TestRecordWaypoints, sys.argv)
