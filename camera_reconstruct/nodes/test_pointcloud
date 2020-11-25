@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-"""Intergration testing for mover"""
-
 
 import sys
 import rospy
@@ -13,7 +11,7 @@ from sensor_msgs.msg import PointCloud2
 class TestPC(unittest.TestCase):
     def __init__(self, *args):
         """
-        Init a test class for pointcloud pipeline node
+        Initialize a test class for pointcloud pipeline node
         """
         super(TestPC, self).__init__(*args)
         rospy.init_node('TestPC_node')
@@ -23,6 +21,7 @@ class TestPC(unittest.TestCase):
     def test_pc(self):
         '''
         test to make sure service returns PointCloud2 message
+        PointCloud2 message should be empty
         '''
         mypc = self.pc()
         frame = mypc.pc.header.frame_id
