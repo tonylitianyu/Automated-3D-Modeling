@@ -157,8 +157,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
-   nodes/record_waypoints
-   nodes/trajectory
+   nodes/scanner_arm
+   nodes/turntable
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
@@ -205,5 +205,6 @@ include_directories(
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
-    add_rostest(test/arm_motion.test)
+#    add_rostest(test/arm_motion.test)
+    add_rostest(test/turntable.test)
 endif()

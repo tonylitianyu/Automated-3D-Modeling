@@ -1,5 +1,5 @@
 <launch>
-    <group ns="turtle" >
+    <!-- <group ns="turtle" >
         <param name="tf_prefix" value="turtlebot3" />
         <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
         <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
@@ -10,5 +10,10 @@
             </node>
             
         <node name="turntable" pkg="arm_motion" type="turntable" />
-    </group>
+    </group> -->
+    <node name="turntable" pkg="arm_motion" type="turntable" />
+    <!-- Launch test nodes -->
+    <test test-name="test_turntable" pkg="arm_motion" type="test_turntable" />
+    <!-- <test test-name="test_scanner_arm" pkg="arm_motion" type="test_scanner_arm" /> -->
+
 </launch>

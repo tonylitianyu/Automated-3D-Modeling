@@ -4,7 +4,7 @@
       <arg name="electric_gripper" default="true"/>
     </include>
 
-    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints" output="screen">
+    <node name="scanner_arm" pkg="arm_motion" type="scanner_arm" output="screen">
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 

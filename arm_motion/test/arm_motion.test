@@ -1,5 +1,7 @@
 <launch>
-    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints" output="screen">
+
+    <!-- Launch nodes from arm.launch  -->
+    <!-- <node name="scanner_arm" pkg="arm_motion" type="scanner_arm" output="screen">
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
     <param name="tf_prefix" value="turtlebot3" />
@@ -10,7 +12,29 @@
             <param name="publish_frequency" type="double" value="50.0" />
             <remap from="/turtle/joint_states" to="/joint_states" />
         </node>
-    <node name="trajectory" pkg="arm_motion" type="trajectory" />
-    <test test-name="test_trajectory" pkg="arm_motion" type="test_trajectory" />
-    <test test-name="test_record_waypoints" pkg="arm_motion" type="test_record_waypoints" />
+    <node name="turntable" pkg="arm_motion" type="turntable" /> -->
+    <include file="$(find sawyer_moveit_config)/launch/sawyer_moveit.launch">
+      <arg name="electric_gripper" default="true"/>
+    </include>
+
+    <node name="scanner_arm" pkg="arm_motion" type="scanner_arm" output="screen">
+      <remap from="joint_states" to="robot/joint_states"/> 
+    </node>
+
+    <arg name="align" default="false" />
+
+    <node name="find_depth" pkg="camera_motion" type="find_depth" 
+        if="$(eval arg('align') == true)">
+    </node>
+
+    <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
+
+    <!-- <include file="$(find camera_reconstruct)/launch/viewer.launch"/> -->
+
+    <include file="$(find arm_motion)/launch/turtlebot.launch"/>
+
+    <!-- Launch test nodes -->
+    <test test-name="test_turntable" pkg="arm_motion" type="test_turntable" />
+    <!-- <test test-name="test_scanner_arm" pkg="arm_motion" type="test_scanner_arm" /> -->
+
 </launch>

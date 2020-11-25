@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+
+""" 
+This node controls the turtblebot
+PUBLISHERS:
+  + <cmd_vel> (<Twist>) ~ the velocity of the turtlebot
+BROADCASTS:
+  + <tf_static> (<StaticTransformBroadcaster>) ~ Transform odom frame in world frame
+SERVICES:
+  + <pause> (<Empty>) ~ stop the turtle's motion (not resetting)
+  + <resume> (<Empty>) ~ resume the turtle's motion along the trajectory
+ 
+"""
+
+import rospy
+import math
+import tf2_ros
+from tf_conversions import transformations
+from geometry_msgs.msg import Twist, Point, Pose, Quaternion, PoseStamped, TransformStamped
+from std_msgs.msg import String
+from nav_msgs.msg import Path, Odometry
+from std_srvs.srv import Empty, EmptyResponse
+
+class Trajectory:
+    def __init__(self, freq):
+        """Init a trajectory object that create trajectory for the robot
+            Args:
+                frequency (float) - ros publisher frequency
+        """
+        #trajectory time
+        self.t = 0
+        self.update = True
+        self.dt = 1.0/freq
+        self.curr_ori_euler = []
+
+        #service init
+        self.pause_srv = rospy.Service("pause", Empty, self.pause_callback)
+        self.resume_srv = rospy.Service("resume", Empty, self.resume_callback)
+
+        self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
+
+    def pause_callback(self,emp):
+        """Callback function to pause tje robot for the <pause> service
+            Args:
+                empty (Empty) - empty message
+            Returns:
+                empty (EmptyResponse) - returns empty
+        """
+
+        self.update = False
+        return EmptyResponse()
+
+    def resume_callback(self,emp):
+        """Callback function to resume the robot for the <resume> service
+            Args:
+                empty (Empty) - empty message
+            Returns:
+                empty (EmptyResponse) - returns empty
+        """
+        self.update = True
+        self.pub_finish.publish(String('turtle'))
+        return EmptyResponse()
+
+    def t_increase(self):
+        """This function decides whether trajectory should continue drawing or not
+        """
+        self.t += self.dt
+
+
+class TurtleBot:
+    def __init__(self, scan_side):
+        """Init a trajectory object that create trajectory for the robot
+            Args:
+                scan_side (int) - the number of faces needs to be scanned
+        """
+        #frame init
+        self.static_broadcaster = tf2_ros.StaticTransformBroadcaster()
+        self.world_odom_tf = TransformStamped()
+        self.world_odom_tf.header.stamp = rospy.Time.now()
+        self.world_odom_tf.header.frame_id = "world"
+        self.world_odom_tf.child_frame_id = "odom"
+        self.world_odom_tf.transform.translation.x = 1
+        self.world_odom_tf.transform.translation.y = 0
+        self.world_odom_tf.transform.translation.z = -0.4
+        q_world = transformations.quaternion_about_axis(0.0,[0,0,1])
+        self.world_odom_tf.transform.rotation = Quaternion(*q_world)
+        self.static_broadcaster.sendTransform(self.world_odom_tf)
+
+        self.broadcaster = tf2_ros.TransformBroadcaster()
+
+        #init publisher
+        self.pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size = 10)
+        self.sub_odom = rospy.Subscriber('odom', Odometry, self.odomCallback)
+
+        self.scan_side = scan_side
+        self.curr_scan_idx = 0
+        self.scan_side_arr = []
+        self.timer_arr = [3.2,3.4,3.4,3.4]
+        for i in range(self.scan_side):
+            step = 2*math.pi/self.scan_side
+            self.scan_side_arr.append(i*step)
+
+        self.scan_side_arr.append(0)
+
+        #interact with sawyer
+        self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
+        self.timer_srv = rospy.Service("timer", Empty, self.start_timer_callback)
+
+        self.pub_flag = True
+
+        self.stop_flag = True
+
+    def start_timer_callback(self,timer):
+        self.stop_flag = False
+        curr_time = rospy.get_time()
+        while (rospy.get_time()- curr_time) <= self.timer_arr[self.curr_scan_idx]:
+            self.stop_flag = False
+        self.stop_flag = True
+        self.curr_scan_idx += 1
+        if self.curr_scan_idx > self.scan_side:
+            self.curr_scan_idx = 0
+        if self.curr_scan_idx == self.scan_side:
+            pass
+        else:
+            self.pub_finish.publish(String("camera"))
+        return EmptyResponse()
+
+    def update_velocity(self):
+        """Publishing new calculated velocity to <cmd_vel>
+            Args:
+        """
+        if self.stop_flag == False:
+            v = 0.001
+            omega = 0.5
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
+        else:
+            v = 0.0
+            omega = 0.0
+            vel = Twist()
+            vel.linear.x = v
+            vel.angular.z = omega
+            self.pub_vel.publish(vel)
+        
+
+    def odomCallback(self, data):
+        #curr_pos = data.pose.pose.position
+        curr_ori = data.pose.pose.orientation
+
+        q = [curr_ori.x,curr_ori.y,curr_ori.z,curr_ori.w]
+        self.curr_ori_euler = transformations.euler_from_quaternion(q)
+        #print(self.curr_ori_euler)
+
+    def nextFace(self,data):
+        self.curr_scan_idx += 1
+        if self.curr_scan_idx >= self.scan_side:
+            self.curr_scan_idx = 0
+
+
+def main():
+    """ The main() function. """
+    #ros node init
+    rospy.init_node('turntable')
+    pub_freq = 50
+    r = rospy.Rate(pub_freq)
+    rospy.sleep(1.0)
+
+    traj = Trajectory(pub_freq)
+
+    scan_side = 4
+    turtle = TurtleBot(scan_side)
+
+    
+
+    rospy.sleep(1.0)
+    while not rospy.is_shutdown():
+        
+        if traj.update:
+            traj.t_increase()
+           
+            turtle.update_velocity()
+        else:
+
+            turtle.pub_vel.publish(Twist())
+        r.sleep()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
+
