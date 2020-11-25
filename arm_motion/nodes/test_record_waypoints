@@ -1,34 +1,41 @@
-#!/usr/bin/env python
-"""Intergration testing for record_waypoints"""
-
+#!/usr/bin/env python3
+"""Intergration testing for trajectory"""
 
 import sys
 import rospy
 import unittest
-from std_msgs.msg import String, Bool, Int16
-import arm_motion
-from arm_motion.record_waypoints import MoveGroupPythonInterface as m
+from std_srvs.srv import Empty
+from std_msgs.msg import String
+from camera_reconstruct.srv import save_pc
+"""
+    test arm_motion_callback.
+    If camera takes the first picture, callback function should send calling timer message and call timer to make turtle move
+
+"""
 
 class TestRecordWaypoints(unittest.TestCase):
     def __init__(self, *args):
-        """Init a test class for record_waypoints node
+        """Init a test class for mover node
         """
         super(TestRecordWaypoints, self).__init__(*args)
-        
+        self.turtle = rospy.ServiceProxy("timer", Empty)
+        self.next_sub = rospy.Subscriber("/next", String, self.sub_callback)
+        self.debug_pub = rospy.Publisher('/debug', String, queue_size=10)
+        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
 
+    def arm_motion_callback_test(self):
+        count = 0
+        self.pc()
+        check = self.next_sub
+        self.assertTrue(check)
     
-    def test_arm_action_callback(self, req):
-        self.count = 0
-        self.test = String('camera')
-        ki = m.arm_action_callback(self, req==self.test)
-        self.assertEqual(self.count,1)
-
-
-
-
-    
+    def sub_callback(self, req):
+        if req == self.debug_pub.publish(String('calling timer')):
+            return True
 
 
 if __name__ == '__main__':
-    import rosunit
-    rosunit.unitrun('arm_motion','test_motion', TestRecordWaypoints, sys.argv)
+    import rostest
+    rostest.rosrun('arm_motion','test_motion', TestRecordWaypoints, sys.argv)
+
+    
