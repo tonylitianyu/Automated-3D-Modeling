@@ -8,7 +8,7 @@
 1. Compile: `catkin_make`
 1. Connect Real Sense Camera
 1. Start simulation: `roslaunch camera_reconstruct viewer.launch gaz:=true`
-1. Use /generate_cp/save_pc to save current point cloud, transform point cloud about TurtleBot base_scan fram, and crop point cloud
+1. Use /generate_cp/save_pc to save current point cloud, transform point cloud about TurtleBot base_scan frame, and crop point cloud
     * If the service is called multiple times, all point clouds will be fused and published to /fused_pc topic
 
 #### Configuration Instructions:
