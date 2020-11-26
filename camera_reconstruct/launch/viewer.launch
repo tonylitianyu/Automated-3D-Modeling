@@ -16,10 +16,12 @@
     </group>
 
     <!-- launch rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer.rviz" unless='$(arg gaz)'/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer_sim.rviz" if='$(arg gaz)'/>
 
     <!-- launch generate_pc node -->
-    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' />
+    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' unless='$(arg gaz)'/>
+    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc_sim' output='screen' if='$(arg gaz)'/>
 
     <!-- launch fuse_pc node -->
     <node name="fuse_pc" pkg='camera_reconstruct' type='fuse_pc' output='screen'/>
