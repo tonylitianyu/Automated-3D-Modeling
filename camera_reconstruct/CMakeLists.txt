@@ -62,6 +62,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   save_pc.srv
+  export_pc.srv #
 )
 
 ## Generate actions in the 'action' folder
@@ -141,6 +142,10 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/camera_reconstruct_node.cpp)
 add_executable(fuse_pc nodes/fuse_pc.cpp)
+#
+add_executable(export_pc_client nodes/export_pc_client.cpp)
+add_executable(export_pc_server_class nodes/export_pc_server_class.cpp)
+add_executable(export_pc_server nodes/export_pc_server.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,7 +163,7 @@ add_dependencies(fuse_pc ${fuse_pc_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(fuse_pc
+target_link_libraries(fuse_pc # export_pc_client export_pc_server export_pc_server_class
   ${catkin_LIBRARIES}
 )
 
@@ -177,6 +182,7 @@ target_link_libraries(fuse_pc
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   nodes/generate_pc
+  nodes/generate_pc_sim
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -223,3 +229,8 @@ install(TARGETS fuse_pc
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest(test/pointcloud.test)
+endif()
