@@ -1,6 +1,6 @@
 # final-project-blocked
 This is final group project for ME495 at Northwestern University  
-Author: Arun Kumar, Bowen Feng, Nicole Baptist, Tianyu Li, Yen Chin Loke
+Authors: Arun Kumar, Bowen Feng, Nicole Baptist, Tianyu Li, Yen Chin Loke
 
 ## Introduction
 This project creates an automated system for reconstructing object with point clouds. The hardware for this system includes a Rethink Sawyer robot arm with a RealSense camera as the end-effector and a turtlebot (burger).
