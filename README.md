@@ -1,5 +1,13 @@
 # final-project-blocked
-final-project-blocked created by GitHub Classroom
+This is final group project for ME495 at Northwestern University  
+Author: Arun Kumar, Bowen Feng, Nicole Baptist, Tianyu Li, Yen Chin Loke
+
+## Introduction
+This project creates an automated system for reconstructing object with point clouds. The hardware for this system includes a Rethink Sawyer robot arm with a RealSense camera as the end-effector and a turtlebot (burger).
+
+The turtlebot is used as a turn table to allow the realsense camera to record point cloud data for the object. The Sawyer robot arm is used to control the position and the pointing angle of the camera. 
+
+For current version, our system will record point cloud from four sides and the top view of the object to recontruct its point cloud.  
 
 ## File structure:
 ```
@@ -7,12 +15,12 @@ final-project-blocked created by GitHub Classroom
   --arm_motion
   --camera_motion
   --camera_reconstruct
-    --sudo apt install python3-pcl
 ```
 ## Packages & Dependencies
 
     ```
-    
+    sudo apt install python3-pcl
+    ```
 
 ## Instruction
 1. Turn on Sawyer and Turtlebot
