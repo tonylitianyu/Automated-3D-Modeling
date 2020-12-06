@@ -3,6 +3,8 @@
 
 #### This package contains a pipeline to save multiple point clouds and fuse them into a single point cloud. The package provides a service to save a point clouds and sends saved point clouds through pipeline. This package is ideal for 3D scanning.
 
+![](videos/octopus_cropped.gif)
+
 #### Usage Instructions:
 1. Add package to the src folder in your ROS workspace
 1. Compile: `catkin_make`
@@ -19,3 +21,7 @@
         * The TurtleBot is launch in Gazebo and the Sawyer is not launched
         * Publish twist messages to /cmd_vel while calling /generate_pc/save_pc to test point_cloud fusion pipeline
     * Modify PointCloud2 topic in rviz to see live point cloud, last saved point cloud, or fused point cloud
+
+#### Saving Pointclouds:
+1. Use `rosrun pcl_ros pointcloud_to_pcd input:=/fused_pc` to save a .pcd file of the fused pointcloud to the current directory
+1. .pcd files can be viewed in pcl_viewer by using the command `pcl_viewer -multiview 1 path_to_.pcd `
