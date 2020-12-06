@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
+"""
+This node uses moveit to do motion planning for the sawyer robot. 
+This node combines combines services from the trajectory node in the arm_motion package 
+and generate_pc node in the camera_reconstruct package to interface between the camera
+and the turtlebot.
+This node controls the sawyer arm to move to multiple waypoints at varying viewing angles
+along the xz plane to capture multiple views of the target object. 
 
+PUBLISHERS:
+ + </next> (<String>) - "camera" message 
+ + <move_group/display_planned_path> (<DisplayTrajectory>) - trajectory plan in rviz
+
+SUBSCRIBERS:
+ + </next> (<String>) - checks for "camera" message and calls generate_pc/save_pc
+    to save the point cloud and call the turtlebot /timer service
+
+SERVICES:
+ + <reset> (<Empty>) - service to reset the sawyer to its first scanning position
+ + <step> (<Empty>) - service to record the pose of the sawyer after the human
+                      user has manually positioned the end effector
+ + <follow> (<Empty>) - service to execute a path according to waypoints saved from 
+                        step service
+"""
 import sys
 import copy
 import rospy
@@ -12,7 +34,6 @@ from moveit_commander.conversions import pose_to_list
 from std_srvs.srv import Empty, EmptyResponse, SetBool, SetBoolResponse
 from moveit_commander.conversions import pose_to_list
 from moveit_msgs.msg import MoveItErrorCodes
-from arm_motion.srv import Step
 from camera_reconstruct.srv import save_pc
 
 class MoveGroupPythonInterface(object):
@@ -62,16 +83,14 @@ class MoveGroupPythonInterface(object):
 
         ## initilize service
         self.reset = rospy.Service("reset", Empty, self.reset_callback)
-        self.step = rospy.Service("step", Step, self.step_callback)
+        self.step = rospy.Service("step", Empty, self.step_callback)
         self.follow = rospy.Service("follow", Empty, self.follow_callback)
 
         ## initilize publisher and subscriber
         self.next_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
         self.next_pub = rospy.Publisher('/next', String, queue_size=10)
 
-        
-        
-        ## store three target positions into waypoints
+        ## store all target positions into waypoints
         self.scan_x = rospy.get_param('/waypoints_2/x')
         self.scan_y = rospy.get_param('/waypoints_2/y')
         self.scan_z = rospy.get_param('/waypoints_2/z')
@@ -230,7 +249,7 @@ class MoveGroupPythonInterface(object):
         rospy.set_param('/waypoints/z_o', self.z_o_list)
         rospy.set_param('/waypoints/w_o', self.w_o_list)
 
-        return MoveItErrorCodes()
+        return EmptyResponse()
 
     def follow_callback(self, req):
         """ follow service callback

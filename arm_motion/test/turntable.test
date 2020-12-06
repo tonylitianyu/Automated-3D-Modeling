@@ -1,16 +1,5 @@
 <launch>
-    <!-- <group ns="turtle" >
-        <param name="tf_prefix" value="turtlebot3" />
-        <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
-        <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
 
-            <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher_2">
-                <param name="publish_frequency" type="double" value="50.0" />
-                <remap from="/turtle/joint_states" to="/joint_states" />
-            </node>
-            
-        <node name="turntable" pkg="arm_motion" type="turntable" />
-    </group> -->
     <node name="turntable" pkg="arm_motion" type="turntable" />
     <!-- Launch test nodes -->
     <test test-name="test_turntable" pkg="arm_motion" type="test_turntable" />

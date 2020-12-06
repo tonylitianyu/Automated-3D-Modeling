@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """ 
-This node controls the turtblebot
+This node controls the turtblebot to rotate 90 degrees whenever the timer 
+service is called (by the scanner_arm node)
+
 PUBLISHERS:
   + <cmd_vel> (<Twist>) ~ the velocity of the turtlebot
 BROADCASTS:

@@ -4,6 +4,8 @@ This node uses moveit to do motion planning for the sawyer robot.
 This node combines combines services from the trajectory node in the arm_motion package 
 and generate_pc node in the camera_reconstruct package to interface between the camera
 and the turtlebot.
+This node controls the sawyer arm to capture 4 views of the object from the front (side) 
+and 1 view from the top (birds eye). 
 
 PUBLISHERS:
  + </next> (<String>) - "camera" message 
@@ -14,7 +16,7 @@ SUBSCRIBERS:
     to save the point cloud and call the turtlebot /timer service
 
 SERVICES:
- + <start> (<Empty>) - service to start the scan 
+ + <start> (<Empty>) - service to start the scanning
  + <reset> (<Empty>) - service to reset the sawyer to its first scanning position
  + <step> (<Empty>) - service to record the pose of the sawyer after the human
                       user has manually positioned the end effector
@@ -63,7 +65,7 @@ class MoveGroupPythonInterface(object):
         self.home = Pose()
         self.picture = Pose()
         
-        # store all past states
+        ## variables to store waypoints from step service
         self.x_list = []
         self.y_list = []
         self.z_list = []
@@ -71,14 +73,6 @@ class MoveGroupPythonInterface(object):
         self.y_o_list = []
         self.z_o_list = []
         self.w_o_list = []
-
-        self.x_sent_list = []
-        self.y_sent_list = []
-        self.z_sent_list = []
-        self.x_sent_o_list = []
-        self.y_sent_o_list = []
-        self.z_sent_o_list = []
-        self.w_sent_o_list = []
 
         ## provide service
         self.start = rospy.Service("start", Empty, self.start_callback)
@@ -105,7 +99,7 @@ class MoveGroupPythonInterface(object):
         self.scan_z_o = rospy.get_param('/waypoints/z_o')
         self.scan_w_o = rospy.get_param('/waypoints/w_o')
         
-        ## save home pose 
+        ## save home pose from params
         self.home.position.x = self.scan_x[0]
         self.home.position.y = self.scan_y[0]
         self.home.position.z = self.scan_z[0]
@@ -115,7 +109,7 @@ class MoveGroupPythonInterface(object):
         self.home.orientation.w = self.scan_w_o[0]
         rospy.loginfo('saved home pose')
 
-        ## save first picture pose
+        ## save first picture pose from params
         self.picture.position.x = self.scan_x[1]
         self.picture.position.y = self.scan_y[1]
         self.picture.position.z = self.scan_z[1]
@@ -153,6 +147,11 @@ class MoveGroupPythonInterface(object):
         return EmptyResponse()
 
     def arm_action_callback(self, req):
+        """
+        /next subscriber callback function to integrate 
+        turtlebot3 motion and point cloud saving service.
+        """
+
         rospy.loginfo(req)
         
         if req == String('camera'):
@@ -250,6 +249,7 @@ class MoveGroupPythonInterface(object):
     def follow_callback(self, req):
         """ follow service callback
             executes the path of previously saved waypoints
+            used to check sanity of planned path from given waypoints
 
             returns:
                 EmptyResponse
