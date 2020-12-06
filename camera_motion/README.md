@@ -7,7 +7,7 @@ This package contains a tool for aligning the center of the depth camera with th
 The `find_depth` node publishes the depth value of the center <b>n x n</b> pixel. In this way, one can know that if the object is at a the center of the cameraview by checking if the published depth value is at the required distance.
 
 
-###`camera_motion` python library
+### `camera_motion` python library
 This library contains function for calculating the average depth value across space and time to obtain a more stable depth value. For space, it is taking the average depth value of the <b>n x n</b> pixel. For time, it is taking the average depth value across the past <b>m</b> seconds. This library also comes with unit testing.
 
 #### Usage Instructions:
