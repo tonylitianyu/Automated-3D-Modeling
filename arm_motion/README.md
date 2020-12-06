@@ -23,3 +23,6 @@ export TURTLEBOT3_MODEL=burger
 ```
 roslaunch arm_motion arm.launch
 ```
+
+## TODO: scanning from multiple angles
+This was a stretch goal that we did not manage to accomplish. We wrote the `scanner_arm_multi` and `turntable_multi` nodes to allow for multiple angle scans by the camera on the sawyer end_effector, but they are currently not in use for this version of the project. 
