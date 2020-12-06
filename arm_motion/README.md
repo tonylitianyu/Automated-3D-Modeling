@@ -15,7 +15,7 @@ The `turntable` node controls the turtlebot3's rotation and provides a `timer` s
 2. Do `catkin_make` in workspace.
 3. Source workspace `source devel/setup.bash`.
 4. Connect to Sawyer robot and turtlebot (instructions in top level README).
-5. Export turtlebot3 model:
+5. Export turtlebot3 model: 
 ```
 export TURTLEBOT3_MODEL=burger
 ```
@@ -25,4 +25,4 @@ roslaunch arm_motion arm.launch
 ```
 
 ## TODO: scanning from multiple angles
-This was a stretch goal that we did not manage to accomplish. We wrote the `scanner_arm_multi` and `turntable_multi` nodes to allow for multiple angle scans by the camera on the sawyer end_effector, but they are currently not in use for this version of the project. 
+This was a stretch goal that we did not manage to accomplish. We wrote the `scanner_arm_multi` and `turntable_multi` nodes to allow for multiple angle scans by the camera on the sawyer end_effector, but they are currently not in use for this version of the project. THe diference between this ctretch goal and the goal right now is the way we scan the image. In this stretch goal, we scan the image in the top, middle and bottom three degrees. When turtlebot turns 90 degrees, the turtlebot may send string "sawyer" message to make sawyer move into three fixed picture positions. After finish every position movement, sawyer will send string "camera" message to make realsense camera take pictures. After finishing this series of moving, sawyer will send string "turtle" to make turtle turn 90 degrees again. THe stretch goal of this motion is done but we didn't have time to finish that becasue the 3D reconstruction of this is complicated. 
