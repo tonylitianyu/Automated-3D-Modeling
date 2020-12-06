@@ -6,11 +6,13 @@ service is called (by the scanner_arm node)
 
 PUBLISHERS:
   + <cmd_vel> (<Twist>) ~ the velocity of the turtlebot
+  + </next> (<String>) ~ interaction with sawyer
 BROADCASTS:
   + <tf_static> (<StaticTransformBroadcaster>) ~ Transform odom frame in world frame
 SERVICES:
   + <pause> (<Empty>) ~ stop the turtle's motion (not resetting)
   + <resume> (<Empty>) ~ resume the turtle's motion along the trajectory
+  + </timer> (<Empty>) ~ rotate turtlebot3 90 degrees
  
 """
 
@@ -42,7 +44,7 @@ class Trajectory:
         self.pub_finish = rospy.Publisher('/next', String, queue_size=10)
 
     def pause_callback(self,emp):
-        """Callback function to pause tje robot for the <pause> service
+        """Callback function to pause the robot for the <pause> service
             Args:
                 empty (Empty) - empty message
             Returns:
