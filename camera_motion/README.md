@@ -8,7 +8,10 @@ The `find_depth` node publishes the depth value of the center <b>n x n</b> pixel
 
 
 ### `camera_motion` python library
-This library contains function for calculating the average depth value across space and time to obtain a more stable depth value. For space, it is taking the average depth value of the <b>n x n</b> pixel. For time, it is taking the average depth value across the past <b>m</b> seconds. This library also comes with unit testing.
+This library contains function for calculating the average depth value across space and time to obtain a more stable depth value. For space, it is taking the average depth values of the <b>n x n</b> center pixels. For time, it is taking the average depth values across the past <b>m</b> seconds. This library also comes with unit testing.
 
 #### Usage Instructions:
-  1. ```rosrun camera_motion find_depth
+ 1. Rosrun it during the initial hardware setup
+ ```
+ rosrun camera_motion find_depth
+ ```
