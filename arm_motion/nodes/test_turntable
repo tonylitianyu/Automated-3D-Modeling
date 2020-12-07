@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Intergration testing for trajectory"""
+"""
+Intergration testing for trajectory
+
+This node provides a ros integration test for the turntable node
+It tests the timer service by checking whether a String "camera"
+message is published on the /next topic 
+
+"""
 
 import sys
 import rospy
@@ -18,12 +25,19 @@ class TestMotion(unittest.TestCase):
         self.next_sub = rospy.Subscriber("/next", String, self.sub_callback)
 
     def test_timer(self):
-
+        """
+        Test timer service by checking /next topic result
+        """
         self.turtle()
         check = self.next_sub
         self.assertTrue(check)
     
     def sub_callback(self, req):
+        """
+        /next topic subscriber callback function
+
+        Returns: True (<bool>)
+        """
         if req == String("camera"):
             return True
 
