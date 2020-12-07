@@ -159,6 +159,7 @@ include_directories(
  catkin_install_python(PROGRAMS
    nodes/scanner_arm
    nodes/turntable
+   nodes/turtle
 #   nodes/scanner_arm_multi
 #   nodes/turntable_multi
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -178,6 +178,7 @@ target_link_libraries(fuse_pc
 catkin_install_python(PROGRAMS
   nodes/generate_pc
   nodes/generate_pc_sim
+  nodes/generate_pc_slam
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

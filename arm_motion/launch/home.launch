@@ -1,0 +1,12 @@
+<launch>
+    <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard"  output="screen" />
+    <node pkg="arm_motion" type="turtle" name="turtle"/>
+    <!-- <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/> -->
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
+    <include file="$(find slam_toolbox)/online_sync.launch"/>
+    <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
+    <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+        <arg name="model" value="burger" />
+        <arg name="move_forward_only" value="false"/>
+    </include>
+</launch>
