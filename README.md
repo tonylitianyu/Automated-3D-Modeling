@@ -125,7 +125,11 @@ Full demo: [Video](https://drive.google.com/file/d/1BcSyo_AOadVpFWu_8wsWRbMq8CBY
 
 This package contains a pipeline to save multiple point clouds and fuse them into a single point cloud. The package provides a service to save a point clouds and sends saved point clouds through pipeline. This package is ideal for 3D scanning.
 
-![](camera_reconstruct/videos/octopus_cropped.gif)
+original:  
+![](camera_reconstruct/videos/octopus_cropped.gif)  
+
+with SLAM and move_base:  
+![](camera_reconstruct/videos/slam_base.gif)
 
 ### Usage Instructions:
 1. Add package to the src folder in your ROS workspace
