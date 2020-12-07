@@ -121,7 +121,7 @@ Full demo: [Video](https://drive.google.com/file/d/1BcSyo_AOadVpFWu_8wsWRbMq8CBY
 
 <br />
 
-# Camera Reconstruct Package
+## Camera Reconstruct Package
 
 This package contains a pipeline to save multiple point clouds and fuse them into a single point cloud. The package provides a service to save a point clouds and sends saved point clouds through pipeline. This package is ideal for 3D scanning.
 
@@ -170,7 +170,7 @@ ICP can find the transformation between two point clouds. It will be helpful for
 
 <br />
 
-# Camera Motion Package
+## Camera Motion Package
 
 This package contains a tool for aligning the center of the depth camera with the scanning object during initial setup.
 
@@ -188,7 +188,7 @@ This library contains function for calculating the average depth value across sp
 
 <br />
 
-# Arm Motion Package
+## Arm Motion Package
 
 This package contains the launchfiles and nodes to integrate the `camera_reconstruct` point cloud construction pipeline with the Sawyer robot and turtlebot3. This package provides the nodes `scanner_arm` and `turntable`.   
 
