@@ -16,25 +16,10 @@
             </node>
             <arg name="rviz_config" default="$(find sawyer_moveit_config)/launch/moveit.rviz" />
             <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1 0 0 0 0 0 1 sawyer_description world 100" />
-            <!-- <node name="robot1_controller_spawner" pkg="controller_manager" type="spawner" 
-                args="DASHDASHnamespace=/robot1
-                joint_state_controller
-                tri_wheel_controller
-                arm_controller
-                DASHDASHshutdown-timeout 3">
-            </node> -->
+
             <arg name="electric_gripper" default="false"/>
             <arg name="tip_name" default="right_hand"/>
-            <!-- <arg name="controller_box" default="true"/> -->
-            <!-- <param name="sawyer_description_semantic"
-            command="$(find xacro)/xacro DASHDASHinorder $(find sawyer_moveit_config)/srdf/sawyer.srdf.xacro
-                electric_gripper:=$(arg electric_gripper)
-                tip_name:=$(arg tip_name)
-                controller_box:=$(arg controller_box)"/> -->
 
-            <!-- <node name="rqt_robot_steering1" pkg="rqt_robot_steering" type="rqt_robot_steering">
-                <param name="default_topic" value="/robot1/tri_wheel_controller/cmd_vel"/>
-            </node> -->
     </group>
     <include file="$(find sawyer_gazebo)/launch/sawyer_world.launch" />
     <group ns="turtlebot3">
@@ -53,17 +38,6 @@
             <arg name="rviz_config" default="$(find turtlebot3_gazebo)/rviz/turtlebot3_gazebo_model.rviz" />
             <!-- <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="1 0 0 0 0 0 1 turtlebot3_description world 100" /> -->
             <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="1 1 1 0 0 0 1 /turtlebot3/robot_description world 100" />
-            <!-- <node name="robot1_controller_spawner" pkg="controller_manager" type="spawner" 
-                args="DASHDASHnamespace=/robot1
-                joint_state_controller
-                tri_wheel_controller
-                arm_controller
-                DASHDASHshutdown-timeout 3">
-            </node> -->
 
-            <!-- <node name="rqt_robot_steering1" pkg="rqt_robot_steering" type="rqt_robot_steering">
-                <param name="default_topic" value="/robot1/tri_wheel_controller/cmd_vel"/>
-            </node> -->
     </group>
-    <!-- <node name="rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(find xxx)/config/xxx.rviz"/> -->
 </launch>
