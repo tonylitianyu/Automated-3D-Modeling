@@ -9,6 +9,9 @@ class DepthHelper:
 
     def __init__(self, t_avg_range, s_avg_range):
         '''Init a depth helper class
+            Args:
+                t_avg_range (int) - take average for this time period
+                s_avg_range (int) - take average for center s_avg_range * s_avg_range pixels
         '''
         self.t_avg_range = t_avg_range
         self.s_avg_range = s_avg_range
@@ -16,6 +19,10 @@ class DepthHelper:
 
     def spaceSmoothing(self, image):
         '''take average depth in neighbor pixel
+            Args:
+                image (array) - incoming raw depth image
+            Returns:
+                avg_depth_space (float) - average depth value for center pixels
         '''        
         img_width = len(image)
         img_height = len(image[1])
@@ -36,6 +43,11 @@ class DepthHelper:
 
     def timeSmoothing(self, time_queue, next_depth):
         '''take average depth in time
+            Args:
+                time_queue (array) - depth value in the past that needs to taken into the average calculation
+                next_depth (float) - average depth pixel at the center in space
+            Returns:
+                avg_depth_time (int) - average depth pixel in time
         '''
 
         if len(time_queue) >= self.t_avg_range:

@@ -141,6 +141,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/camera_reconstruct_node.cpp)
 add_executable(fuse_pc nodes/fuse_pc.cpp)
+add_executable(fuse_pc_slam nodes/fuse_pc_slam.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -152,6 +153,7 @@ add_executable(fuse_pc nodes/fuse_pc.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(fuse_pc ${fuse_pc_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(fuse_pc_slam ${fuse_pc_slam_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -159,6 +161,9 @@ add_dependencies(fuse_pc ${fuse_pc_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # )
 
 target_link_libraries(fuse_pc
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(fuse_pc_slam
   ${catkin_LIBRARIES}
 )
 
@@ -178,6 +183,7 @@ target_link_libraries(fuse_pc
 catkin_install_python(PROGRAMS
   nodes/generate_pc
   nodes/generate_pc_sim
+  nodes/generate_pc_slam
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

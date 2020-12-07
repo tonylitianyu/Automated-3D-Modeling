@@ -7,6 +7,8 @@ from camera_motion.helper import DepthHelper
 
 class OutputTestCase(unittest.TestCase):
     def test_smoothing_space(self):
+        '''test average depth value in space
+        '''
 
 
         helper = DepthHelper(20, 2)
@@ -16,6 +18,8 @@ class OutputTestCase(unittest.TestCase):
 
 
     def test_smoothing_time(self):
+        '''test average depth value in time
+        '''
         helper = DepthHelper(20, 2)
         time_queue = [689,690,691,692,693]
         next_depth = 694

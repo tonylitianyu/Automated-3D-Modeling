@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+'''
+This node calculates the average depth value at the center of the camera for aligning purpose at initialization
+
+PUBLISHER:
+  + <camera_motion_depth> (<Float32>) ~ publish the average depth value
+
+SUBSCRIBER:
+  + <camera/depth/image_rect_raw> (<Image>) ~ get the raw depth value for each pixel
+
+'''
+
 
 import rospy
 import math

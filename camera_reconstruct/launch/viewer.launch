@@ -2,6 +2,7 @@
     
     <arg name='gaz' default='false' />
     <arg name='clip' default='false' />
+    <arg name='slam' default = 'false' />
 
     <!-- launch realsense pointcloud node-->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
@@ -19,11 +20,19 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer.rviz" unless='$(arg gaz)'/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find camera_reconstruct)/rviz/turtlebot_viewer_sim.rviz" if='$(arg gaz)'/>
 
-    <!-- launch generate_pc node -->
-    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' unless='$(arg gaz)'/>
-    <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc_sim' output='screen' if='$(arg gaz)'/>
+    <group unless='$(arg slam)'>
+        <!-- launch generate_pc node -->
+        <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc' output='screen' unless='$(arg gaz)'/>
+        <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc_sim' output='screen' if='$(arg gaz)'/>
 
-    <!-- launch fuse_pc node -->
-    <node name="fuse_pc" pkg='camera_reconstruct' type='fuse_pc' output='screen'/>
+        <!-- launch fuse_pc node -->
+        <node name="fuse_pc" pkg='camera_reconstruct' type='fuse_pc' output='screen'/>
+    </group>
+
+    <group if='$(arg slam)'>
+        <node name="generate_pc_slam" pkg='camera_reconstruct' type='generate_pc_slam' output='screen'/>
+        <node name="fuse_pc_slam" pkg='camera_reconstruct' type='fuse_pc_slam' output='screen'/>
+
+    </group>
 
 </launch>

@@ -38,52 +38,52 @@ class GeneratePC:
 
 
 
-        #initialize broadcaster
-        self.static_broadcaster = tf2_ros.StaticTransformBroadcaster()
-
-        # create static transform from ee to realsense
-        self.ee_cam_tf = TransformStamped()
-        self.ee_cam_tf.header.stamp = rospy.Time.now()
-        self.ee_cam_tf.header.frame_id = 'right_gripper_l_finger_tip'
-        self.ee_cam_tf.child_frame_id = 'camera_link'
-        q = transformations.quaternion_from_euler(0,3*pi/2,pi)
-        self.ee_cam_tf.transform.translation.x = 0
-        self.ee_cam_tf.transform.translation.y = 0
-        self.ee_cam_tf.transform.translation.z = 0
-        self.ee_cam_tf.transform.rotation.x = q[0]
-        self.ee_cam_tf.transform.rotation.y = q[1]
-        self.ee_cam_tf.transform.rotation.z = q[2]
-        self.ee_cam_tf.transform.rotation.w = q[3]
-        self.static_broadcaster.sendTransform(self.ee_cam_tf)
 
 
-
+        #at home
+        self.pc_br = tf2_ros.TransformBroadcaster()
+        self.static_broadcaster_world = tf2_ros.StaticTransformBroadcaster()
+        self.world_tf = TransformStamped()
+        self.world_tf.header.stamp = rospy.Time.now()
+        self.world_tf.header.frame_id = 'camera_depth_optical_frame'
+        self.world_tf.child_frame_id = 'object'
+        self.world_tf.transform.translation.x = 0
+        self.world_tf.transform.translation.y = 0
+        self.world_tf.transform.translation.z = 0.5
+        q_world = transformations.quaternion_about_axis(0.0,[0,0,1])
+        self.world_tf.transform.rotation = Quaternion(*q_world)
+        self.static_broadcaster_world.sendTransform(self.world_tf)
 
         #initialize transform listener
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
-
+        self.rotang_arr = [0,pi/2,pi,-pi/2]
+        self.x_arr = [0,-0.5,0.0,0.5]
+        self.z_arr = [-0.5,0.0,0.5,0.0]
+        self.rot_index = 0
     def pc_callback(self,pc):
         '''
         subscriber callback function
-        transforms most recent PointCloud2 message to odom frame
+        transforms most recent PointCloud2 message to object_rot frame
         updates self.cur_pc to transformed PointCloud2 message
         '''
-        #Transform point cloud to base_scan frame
-        try:
-            trans = self.tf_buffer.lookup_transform('base_scan',pc.header.frame_id,pc.header.stamp,rospy.Duration(0.1))
-        except tf2.LookupException as ex:
-            rospy.logwarn(ex)
-            return
-        except tf2.ExtrapolationException as ex:
-            rospy.logwarn(ex)
-            return
-
-        
 
 
-        cloud_out = do_transform_cloud(pc,trans)
+        new_pc_frame = TransformStamped()
+        new_pc_frame.header.stamp = rospy.Time.now()
+        new_pc_frame.header.frame_id = 'object'
+        new_pc_frame.child_frame_id = 'object_rot'
+        new_pc_frame.transform.translation.x = self.x_arr[self.rot_index]
+        new_pc_frame.transform.translation.y = 0
+        new_pc_frame.transform.translation.z = self.z_arr[self.rot_index]
+
+        q1 = transformations.quaternion_about_axis(self.rotang_arr[self.rot_index],[0,1,0])
+        new_pc_frame.transform.rotation = Quaternion(*q1)
+        self.pc_br.sendTransform(new_pc_frame)
+
+
+        cloud_out = do_transform_cloud(pc,new_pc_frame)
 
         #update attribute
         self.cur_pc = cloud_out
@@ -97,6 +97,13 @@ class GeneratePC:
         returns:
             mypc: saved PointCloud2 message
         '''
+
+        if self.rot_index > (len(self.rotang_arr)-2):
+            self.rot_index = 0
+        else:
+            self.rot_index += 1
+
+
 
         mypc = self.cur_pc
         self.pc_pub.publish(mypc)

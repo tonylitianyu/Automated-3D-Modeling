@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+""" 
+This node controls the turtblebot to rotate to different orientations for scanning
+
+ACTIONS:
+  + <move_base> (<MoveBaseAction>) ~ move robot to the goal
+
+SERVICES:
+  + <rotate> (<Empty>) ~ start the rotation
+
+SERVICE PROXY:
+  + <move_base/NavfnROS/make_plan> plan the trajectory without performing action
+  + <generate_pc/save_pc> save point cloud
+
+
+"""
+import roslib
+import rospy
+import math
+import actionlib
+import numpy as np
+import random
+from tf_conversions import transformations
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseFeedback
+from nav_msgs.msg import OccupancyGrid
+from nav_msgs.srv import GetPlan, GetPlanRequest
+from geometry_msgs.msg import PoseStamped, Quaternion
+from std_srvs.srv import Empty, EmptyResponse
+from camera_reconstruct.srv import save_pc
+
+class Turtle:
+    def __init__(self):
+        '''
+            This class performs the rotation task of the turtlebot
+        '''
+        #Initialization
+        self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        self.client.wait_for_server()
+        
+        self.running = False
+
+        self.curr_x = 0.0
+        self.curr_y = 0.0
+        self.curr_the = 0.0
+
+        self.plan = rospy.ServiceProxy("move_base/NavfnROS/make_plan", GetPlan)
+        self.save_pc = rospy.ServiceProxy("generate_pc/save_pc", save_pc)
+
+        self.rotate_srv = rospy.Service("rotate", Empty, self.rotate_callback)
+        self.rot_arr = [0,math.pi/2, math.pi, -math.pi/2]
+        self.rot_idx = 0
+
+    def rotate_callback(self,emp):
+        '''callback for starting rotation
+        '''
+        self.running = True
+
+        return EmptyResponse()
+
+    def move_to_next(self):
+        '''rotate to the next orientation
+        '''
+
+        self.running = False
+        
+        self.goal = MoveBaseGoal()
+        self.goal.target_pose.header.frame_id = 'map'
+        self.goal.target_pose.pose.position.x = 0.0
+        self.goal.target_pose.pose.position.y = 0.0
+        self.goal.target_pose.pose.position.z = 0.0
+        q1 = transformations.quaternion_about_axis(self.rot_arr[self.rot_idx],[0,0,1])
+       
+        self.goal.target_pose.pose.orientation = Quaternion(*q1)
+
+    
+        self.client.send_goal(self.goal)
+        self.client.wait_for_result()
+
+        rospy.sleep(2)
+        self.save_pc()
+        self.rot_idx += 1
+
+        
+        self.running = True
+
+
+        if self.rot_idx == len(self.rot_arr):
+            self.running = False
+        
+
+
+
+def main():
+    """ The main() function. """
+    #ros node init
+    print("init exploration node")
+    rospy.init_node('turtle')
+    r = rospy.Rate(30)
+
+    rospy.sleep(1)
+
+    explore = Turtle()
+
+    while not rospy.is_shutdown():
+        if explore.running == True:
+            explore.move_to_next()
+        r.sleep()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
