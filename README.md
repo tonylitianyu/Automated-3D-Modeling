@@ -9,9 +9,9 @@ Authors: Arun Kumar, Bowen Feng, Nicole Baptist, Tianyu Li, Yen Chin Loke
 ## Introduction
 This project creates an automated system for reconstructing objects with point clouds. The hardware for this system includes a Rethink Sawyer robot arm and a RealSense camera as the end-effector, and a turtlebot3 (burger).
 
-The turtlebot3 is used as a turntable to allow the RealSense camera to record point cloud data for the object. The Sawyer robot arm is used to control the position and the viewing angle of the camera. 
+The turtlebot3 is used as a turntable to allow the RealSense camera to record point cloud data for the object from all sides. The Sawyer robot arm is used to control the position and the viewing angle of the camera. 
 
-In the current version, our system will record point cloud from four sides and the top view of the object to recontruct its point cloud.  
+In the current version, our system will record point clouds from four sides and the top view of the object to recontruct its point cloud.  
 
 ## File structure
 ```
