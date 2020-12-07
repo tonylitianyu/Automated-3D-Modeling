@@ -1,0 +1,21 @@
+repositories:
+  blocked:
+    type: git
+    url: https://github.com/ME495-EmbeddedSystems/final-project-blocked
+    version: master
+  intera_common:
+    type: git
+    url: https://github.com/RethinkRobotics/intera_common.git
+    version: master
+  intera_sdk:
+    type: git
+    url: https://github.com/RethinkRobotics/intera_sdk.git
+    version: master
+  sawyer_moveit:
+    type: git
+    url: https://github.com/RethinkRobotics/sawyer_moveit.git
+    version: master
+  sawyer_robot:
+    type: git
+    url: https://github.com/RethinkRobotics/sawyer_robot.git
+    version: master
