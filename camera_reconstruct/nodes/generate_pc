@@ -98,13 +98,6 @@ class GeneratePC:
             mypc: saved PointCloud2 message
         '''
 
-        if self.rot_index > (len(self.rotang_arr)-2):
-            self.rot_index = 0
-        else:
-            self.rot_index += 1
-
-
-
         mypc = self.cur_pc
         self.pc_pub.publish(mypc)
         self.pc_list.append(mypc)

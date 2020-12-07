@@ -30,7 +30,7 @@
     </group>
 
     <group if='$(arg slam)'>
-        <node name="generate_pc" pkg='camera_reconstruct' type='generate_pc_slam' output='screen'/>
+        <node name="generate_pc_slam" pkg='camera_reconstruct' type='generate_pc_slam' output='screen'/>
         <node name="fuse_pc_slam" pkg='camera_reconstruct' type='fuse_pc_slam' output='screen'/>
 
     </group>

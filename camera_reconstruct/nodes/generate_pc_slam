@@ -65,12 +65,11 @@ class GeneratePC:
     def pc_callback(self,pc):
         '''
         subscriber callback function
-        transforms most recent PointCloud2 message to odom frame
+        transforms most recent PointCloud2 message to object_rot frame
         updates self.cur_pc to transformed PointCloud2 message
         '''
 
 
-        
         new_pc_frame = TransformStamped()
         new_pc_frame.header.stamp = rospy.Time.now()
         new_pc_frame.header.frame_id = 'object'
