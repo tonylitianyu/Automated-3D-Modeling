@@ -15,6 +15,7 @@
 
 #### Configuration Instructions:
 1. viewer.launch configuration
+    * By default launches Realsense, rviz, generate_pc, and fuse_pc
     * The viewer launch file contains arguements gaz and clip
     * Set clip true to use a camera clipping distance of 0.7
     * Set gaz to true to launch a point cloud viewer without a physical TurtleBot or Sawyer
@@ -25,3 +26,18 @@
 #### Saving Pointclouds:
 1. Use `rosrun pcl_ros pointcloud_to_pcd input:=/fused_pc` to save a .pcd file of the fused pointcloud to the current directory
 1. .pcd files can be viewed in pcl_viewer by using the command `pcl_viewer -multiview 1 path_to_.pcd `
+
+#### Nodes:
+1. generate_pc
+    * Subscribes to PointCloud2 messages from Realsense camera
+    * Provides a service to transform and publish current pointcloud to /saved_pcs topic
+1. generate_pc_sim
+    * Same functionality as generate_pc but works in simulation without the Sawyer robot
+    * Used for at home testing
+1. fuse_pc
+    * Subscribes to saved_pcs topic
+    * Concatenates all saved_pcs into a single PointCloud2 message
+    * Crops fused pointcloud
+    * Publishes resulting pointcloud to /fused_pc
+1. test_pointcloud
+    * Test file to ensure save_pc service is functional
