@@ -118,6 +118,7 @@ This package contains a pipeline to save multiple point clouds and fuse them int
         * The TurtleBot is launch in Gazebo and the Sawyer is not launched
         * Publish twist messages to /cmd_vel while calling /generate_pc/save_pc to test point_cloud fusion pipeline
     * Modify PointCloud2 topic in rviz to see live point cloud, last saved point cloud, or fused point cloud
+    * Set slam to ture uses the slam_toolbox and move_base frame for reconstruction
 
 #### Saving Pointclouds:
 1. Use `rosrun pcl_ros pointcloud_to_pcd input:=/fused_pc` to save a .pcd file of the fused pointcloud to the current directory
@@ -175,7 +176,9 @@ The `turntable` node controls the turtlebot3's rotation and provides a `timer` s
 Overall launch file to launch entire system from this project
 2. `turtlebot.launch`
 Launches the `turntable` node and a `robot_state_publisher`
-3. `testbots.launch`
+3. `home.launch'
+Motion with slam_toolbox and move_base
+4. `testbots.launch`
 For testing loading 2 robots into gazebo at the same time
 
 ## Future Work
