@@ -129,11 +129,11 @@ This package contains a pipeline to save multiple point clouds and fuse them int
 
 ### Usage Instructions:
 1. Add package to the src folder in your ROS workspace
-1. Compile: `catkin_make`
-1. Connect Real Sense Camera
-1. Start simulation: `roslaunch camera_reconstruct viewer.launch gaz:=true`
-1. Use /generate_cp/save_pc to save current point cloud, transform point cloud about TurtleBot base_scan frame, and crop point cloud
-    * If the service is called multiple times, all point clouds will be fused and published to /fused_pc topic
+2. Compile: `catkin_make`
+3. Connect Real Sense Camera
+4. Start simulation: `roslaunch camera_reconstruct viewer.launch gaz:=true`
+5. Use `/generate_cp/save_pc` to save current point cloud, transform point cloud about TurtleBot base_scan frame, and crop point cloud
+    * If the service is called multiple times, all point clouds will be fused and published to `/fused_pc` topic
 
 ### Configuration Instructions:
 1. viewer.launch configuration
@@ -147,22 +147,28 @@ This package contains a pipeline to save multiple point clouds and fuse them int
 
 ### Saving Pointclouds:
 1. Use `rosrun pcl_ros pointcloud_to_pcd input:=/fused_pc` to save a .pcd file of the fused pointcloud to the current directory
-1. .pcd files can be viewed in pcl_viewer by using the command `pcl_viewer -multiview 1 path_to_.pcd `
+2. .pcd files can be viewed in pcl_viewer by using the command `pcl_viewer -multiview 1 path_to_.pcd `
 
 ### Nodes
 1. `generate_pc`
-    * Subscribes to PointCloud2 messages from Realsense camera
-    * Provides a service to transform and publish current pointcloud to /saved_pcs topic
-1. `generate_pc_sim`
-    * Same functionality as generate_pc but works in simulation without the Sawyer robot
+    * Subscribes to `PointCloud2` messages from Realsense camera
+    * Provides a service to transform and publish current pointcloud to `/saved_pcs` topic
+2. `generate_pc_sim`
+    * Same functionality as `generate_pc` but works in simulation without the Sawyer robot
     * Used for at home testing
-1. `fuse_pc`
-    * Subscribes to /saved_pcs topic
+3. `generate_pc_slam`
+    * Same functionality as `generate_pc` but works with the SLAM implementation of turtlebot3
+    * Used in home testing
+4. `fuse_pc`
+    * Subscribes to `/saved_pcs` topic
     * Concatenates all saved_pcs into a single PointCloud2 message
     * Crops fused pointcloud
-    * Publishes resulting pointcloud to /fused_pc
-1. `test_pointcloud`
-    * Test file to ensure save_pc service is functional
+    * Publishes resulting pointcloud to `/fused_pc`
+5. `fuse_pc_slam`
+    * Same function as `fuse_pc` but works with SLAM implementation of turtlebot3
+    * Used for home testing
+6. `test_pointcloud`
+    * Test file to ensure `save_pc` service is functional
     
 ### Future Work
 #### ICP (Iterative Closest Point)
@@ -181,7 +187,7 @@ The `find_depth` node publishes the depth value of the center <b>n x n</b> pixel
 This library contains function for calculating the average depth value across space and time to obtain a more stable depth value. For space, it is taking the average depth values of the <b>n x n</b> center pixels. For time, it is taking the average depth values across the past <b>m</b> seconds. This library also comes with unit testing.
 
 ### Usage Instructions:
- 1. Rosrun it during the initial hardware setup
+Rosrun it during the initial hardware setup
  ```
  rosrun camera_motion find_depth
  ```
@@ -199,6 +205,9 @@ The `scanner_arm` node calls a service provided by the `camera_reconstruct` pack
 
 2. `turntable` node    
 The `turntable` node controls the turtlebot3's rotation and provides a `timer` service to enable other nodes to interact with it.
+
+3. `turtle` node 
+The `turtle` node implements SLAM on the turtlebot3 to get improved tf feedback for the fusing of pointclouds
 
 ### Launch files 
 1. `arm.launch`    
