@@ -9,7 +9,7 @@ The turtlebot3 is used as a turntable to allow the RealSense camera to record po
 
 In the current version, our system will record point cloud from four sides and the top view of the object to recontruct its point cloud.  
 
-## File structure:
+## File structure
 ```
 --final-project-blocked
   --arm_motion
@@ -20,7 +20,8 @@ In the current version, our system will record point cloud from four sides and t
 This package assumes the user has packages from the custom `nuws` and `rethink_ws` installed (ME495 Fall 2020 course website).   
 To install the additional required packages:
 ```
-sudo apt install python3-pcl
+sudo apt install ros-noetic-tf2-sensor-msgs
+sudo apt install ros-noetic-pcl-ros
 ```
 To install sawyer_moveit, do:
 ```
@@ -36,6 +37,7 @@ catkin_make
 1. Clone this repository into your workspace. 
 2. Install: do in workspace `catkin_make`
 3. Source workspace `source devel/setup.bash`
+
 
 ## Operating Instructions
 1. Power on Sawyer and Turtlebot
@@ -61,5 +63,7 @@ catkin_make
     roslaunch arm_motion arm.launch
     ```
 
+## Demo Videos
+Full demo: [Video](https://github.com/ME495-EmbeddedSystems/final-project-blocked/blob/master/media/495double_octopus.mp4)
 
     
