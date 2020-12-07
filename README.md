@@ -176,7 +176,7 @@ The `turntable` node controls the turtlebot3's rotation and provides a `timer` s
 Overall launch file to launch entire system from this project
 2. `turtlebot.launch`
 Launches the `turntable` node and a `robot_state_publisher`
-3. `home.launch'
+3. `home.launch`
 Motion with slam_toolbox and move_base
 4. `testbots.launch`
 For testing loading 2 robots into gazebo at the same time
