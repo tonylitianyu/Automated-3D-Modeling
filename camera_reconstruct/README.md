@@ -35,7 +35,7 @@
     * Same functionality as generate_pc but works in simulation without the Sawyer robot
     * Used for at home testing
 1. fuse_pc
-    * Subscribes to saved_pcs topic
+    * Subscribes to /saved_pcs topic
     * Concatenates all saved_pcs into a single PointCloud2 message
     * Crops fused pointcloud
     * Publishes resulting pointcloud to /fused_pc
