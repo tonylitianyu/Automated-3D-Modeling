@@ -102,7 +102,7 @@ This package contains a pipeline to save multiple point clouds and fuse them int
 
 ![](camera_reconstruct/videos/octopus_cropped.gif)
 
-#### Usage Instructions:
+### Usage Instructions:
 1. Add package to the src folder in your ROS workspace
 1. Compile: `catkin_make`
 1. Connect Real Sense Camera
@@ -110,7 +110,7 @@ This package contains a pipeline to save multiple point clouds and fuse them int
 1. Use /generate_cp/save_pc to save current point cloud, transform point cloud about TurtleBot base_scan frame, and crop point cloud
     * If the service is called multiple times, all point clouds will be fused and published to /fused_pc topic
 
-#### Configuration Instructions:
+### Configuration Instructions:
 1. viewer.launch configuration
     * The viewer launch file contains arguements gaz and clip
     * Set clip true to use a camera clipping distance of 0.7
@@ -120,11 +120,11 @@ This package contains a pipeline to save multiple point clouds and fuse them int
     * Modify PointCloud2 topic in rviz to see live point cloud, last saved point cloud, or fused point cloud
     * Set slam to ture uses the slam_toolbox and move_base frame for reconstruction
 
-#### Saving Pointclouds:
+### Saving Pointclouds:
 1. Use `rosrun pcl_ros pointcloud_to_pcd input:=/fused_pc` to save a .pcd file of the fused pointcloud to the current directory
 1. .pcd files can be viewed in pcl_viewer by using the command `pcl_viewer -multiview 1 path_to_.pcd `
 
-## Nodes
+### Nodes
 1. `generate_pc`
     * Subscribes to PointCloud2 messages from Realsense camera
     * Provides a service to transform and publish current pointcloud to /saved_pcs topic
@@ -138,6 +138,10 @@ This package contains a pipeline to save multiple point clouds and fuse them int
     * Publishes resulting pointcloud to /fused_pc
 1. `test_pointcloud`
     * Test file to ensure save_pc service is functional
+    
+### Future Work
+#### ICP (Iterative Closest Point)
+ICP can find the transformation between two point clouds. It will be helpful for fusing point clouds.
 
 <br />
 
@@ -151,7 +155,7 @@ The `find_depth` node publishes the depth value of the center <b>n x n</b> pixel
 ### `camera_motion` python library
 This library contains function for calculating the average depth value across space and time to obtain a more stable depth value. For space, it is taking the average depth values of the <b>n x n</b> center pixels. For time, it is taking the average depth values across the past <b>m</b> seconds. This library also comes with unit testing.
 
-#### Usage Instructions:
+### Usage Instructions:
  1. Rosrun it during the initial hardware setup
  ```
  rosrun camera_motion find_depth
@@ -163,7 +167,7 @@ This library contains function for calculating the average depth value across sp
 
 This package contains the launchfiles and nodes to integrate the `camera_reconstruct` point cloud construction pipeline with the Sawyer robot and turtlebot3. This package provides the nodes `scanner_arm` and `turntable`.   
 
-## Nodes
+### Nodes
 
 1. `scanner_arm` node   
 The `scanner_arm` node calls a service provided by the `camera_reconstruct` package to save point clouds captured by a RealSense depth camera mounted on the end-effector of a Sawyer robot, and calls a service provided by the `turntable` node to control the turtlebot3's rotation.
@@ -171,7 +175,7 @@ The `scanner_arm` node calls a service provided by the `camera_reconstruct` pack
 2. `turntable` node    
 The `turntable` node controls the turtlebot3's rotation and provides a `timer` service to enable other nodes to interact with it.
 
-## Launch files 
+### Launch files 
 1. `arm.launch`    
 Overall launch file to launch entire system from this project
 2. `turtlebot.launch`
@@ -181,6 +185,6 @@ Motion with slam_toolbox and move_base
 4. `testbots.launch`
 For testing loading 2 robots into gazebo at the same time
 
-## Future Work
-### Scanning from multiple angles
+### Future Work
+#### Scanning from multiple angles
 This was a stretch goal that we did not manage to accomplish. We wrote the `scanner_arm_multi` and `turntable_multi` nodes to allow for multiple angle scans by the camera on the sawyer end_effector, but they are currently not in use for this version of the project. The diference between this "multi" implementation and the current implementation is the way we scan the image. In this stretch goal, we scan the image in the top, middle and bottom three degrees. After the turtlebot3 turns 90 degrees, the `turntable_multi` node publishes `"sawyer"` on the `/next` topic to call the Sawyer to move through three fixed waypoints for capturing point clouds. At each waypoint, `scanner_arm_multi` calls the `/generate_pc/save_pc` service to save the point cloud. After completing this series of motions, Sawyer publishes `"turtle"` on the `/next` topic to turn the turtlebot3 turn 90 degrees again using the `turntable_multi` node. Preliminary versions of the nodes for this motion is done but we didn't have time to test and refine it becasue the 3D reconstruction of this is complicated. 
