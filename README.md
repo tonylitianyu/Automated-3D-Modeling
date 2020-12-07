@@ -63,6 +63,31 @@ git clone https://github.com/ME495-EmbeddedSystems/final-project-blocked
     export TURTLEBOT3_MODEL=burger
     roslaunch arm_motion arm.launch
     ```
+### Operating Instructions for improved version (with SLAM and move_base)
+
+1. Power turtlebot3. Ensure that turtlebot3, and your computer are running on the same `ROS_MASTER_URI`.
+2. Launch from remote computer
+    ```
+    roslaunch arm_motion home.launch
+    ```
+3. Setup turtlebot3
+    - update turtlebot3 time
+      ```
+      ssh ubuntu@turtlebot.local sudo date -s @`(date -u +"%s")`
+      ```
+    - ssh to turtlebot3
+    - launch turtlebot3 on turtblebot3
+      ```
+      roslaunch turtlebot3_bringup turtlebot3_robot.launch
+      ```
+ 4. In rviz, make sure the Global Fixed Frame is ```camera_depth_optical_frame``` and the PointCloud2 topic is ```/camera/depth/color/points```.
+ 5. Adjust the actual camera position. Put the target pointcloud showing in rviz at the center of the ```object``` tf frame.
+ 6. Call service on remote computer to start the scan
+    ```
+    rosservice call /rotate
+    ```
+      
+      
 
 ## Packages and Dependencies
 This package assumes the user has packages from the custom `nuws` and `rethink_ws` installed (ME495 Fall 2020 course website).   
