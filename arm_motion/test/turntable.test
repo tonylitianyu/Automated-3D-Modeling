@@ -1,0 +1,8 @@
+<launch>
+
+    <node name="turntable" pkg="arm_motion" type="turntable" />
+    <!-- Launch test nodes -->
+    <test test-name="test_turntable" pkg="arm_motion" type="test_turntable" />
+    <!-- <test test-name="test_scanner_arm" pkg="arm_motion" type="test_scanner_arm" /> -->
+
+</launch>

@@ -1,0 +1,286 @@
+#!/usr/bin/env python3
+"""
+This node uses moveit to do motion planning for the sawyer robot. 
+This node combines combines services from the trajectory node in the arm_motion package 
+and generate_pc node in the camera_reconstruct package to interface between the camera
+and the turtlebot.
+This node controls the sawyer arm to capture 4 views of the object from the front (side) 
+and 1 view from the top (birds eye). 
+
+PUBLISHERS:
+ + </next> (<String>) - "camera" message 
+ + <move_group/display_planned_path> (<DisplayTrajectory>) - trajectory plan in rviz
+
+SUBSCRIBERS:
+ + </next> (<String>) - checks for "camera" message and calls generate_pc/save_pc
+    to save the point cloud and call the turtlebot /timer service
+
+SERVICES:
+ + <start> (<Empty>) - service to start the scanning
+ + <reset> (<Empty>) - service to reset the sawyer to its first scanning position
+ + <step> (<Empty>) - service to record the pose of the sawyer after the human
+                      user has manually positioned the end effector
+ + <follow> (<Empty>) - service to execute a path according to waypoints saved from 
+                        step service
+"""
+
+import sys
+import copy
+import rospy
+import moveit_commander
+import moveit_msgs.msg
+from geometry_msgs.msg import Pose, PoseStamped
+from math import pi
+from std_msgs.msg import String, Bool
+from moveit_commander.conversions import pose_to_list
+from std_srvs.srv import Empty, EmptyResponse, SetBool, SetBoolResponse
+from moveit_commander.conversions import pose_to_list
+from camera_reconstruct.srv import save_pc
+
+class MoveGroupPythonInterface(object):
+    def __init__(self):
+        super(MoveGroupPythonInterface, self).__init__()
+
+        rospy.init_node('scanner_arm', anonymous=True)
+        joint_state_topic = ['joint_states:=/robot/joint_states']
+        ## First initialize `moveit_commander`_ and a `rospy`_ node:
+        moveit_commander.roscpp_initialize(joint_state_topic)
+        
+        robot = moveit_commander.RobotCommander(robot_description='/robot_description')
+
+        scene = moveit_commander.PlanningSceneInterface()
+
+        group_name = "right_arm"
+        self.group = moveit_commander.MoveGroupCommander(robot_description='/robot_description', name=group_name)
+        self.group.set_max_velocity_scaling_factor(1) # increase robot joint speeds
+
+        display_trajectory_publisher = rospy.Publisher("move_group/display_planned_path",
+                                                        moveit_msgs.msg.DisplayTrajectory,
+                                                        queue_size=20)
+
+        self.initial_pose = self.group.get_current_pose().pose
+
+        ## initilize variables
+        self.count = 0
+        self.home = Pose()
+        self.picture = Pose()
+        
+        ## variables to store waypoints from step service
+        self.x_list = []
+        self.y_list = []
+        self.z_list = []
+        self.x_o_list = []
+        self.y_o_list = []
+        self.z_o_list = []
+        self.w_o_list = []
+
+        ## provide service
+        self.start = rospy.Service("start", Empty, self.start_callback)
+        self.reset = rospy.Service("reset", Empty, self.reset_callback)
+        self.step = rospy.Service("step", Empty, self.step_callback)
+        self.follow = rospy.Service("follow", Empty, self.follow_callback)
+
+        ## initialize service client
+        self.reset_serv = rospy.ServiceProxy("reset", Empty)
+        self.turtle = rospy.ServiceProxy('turtle/timer', Empty)
+        self.pc = rospy.ServiceProxy('generate_pc/save_pc', save_pc)
+
+        ## initialize publisher and subscriber
+        self.next_sub = rospy.Subscriber('/next', String, self.arm_action_callback)
+        self.next_pub = rospy.Publisher('/next', String, queue_size=10)
+        self.debug_pub = rospy.Publisher('/debug', String, queue_size=10)
+
+        ## store three target positions into waypoints
+        self.scan_x = rospy.get_param('/waypoints/x')
+        self.scan_y = rospy.get_param('/waypoints/y')
+        self.scan_z = rospy.get_param('/waypoints/z')
+        self.scan_x_o = rospy.get_param('/waypoints/x_o')
+        self.scan_y_o = rospy.get_param('/waypoints/y_o')
+        self.scan_z_o = rospy.get_param('/waypoints/z_o')
+        self.scan_w_o = rospy.get_param('/waypoints/w_o')
+        
+        ## save home pose from params
+        self.home.position.x = self.scan_x[0]
+        self.home.position.y = self.scan_y[0]
+        self.home.position.z = self.scan_z[0]
+        self.home.orientation.x = self.scan_x_o[0]
+        self.home.orientation.y = self.scan_y_o[0]
+        self.home.orientation.z = self.scan_z_o[0]
+        self.home.orientation.w = self.scan_w_o[0]
+        rospy.loginfo('saved home pose')
+
+        ## save first picture pose from params
+        self.picture.position.x = self.scan_x[1]
+        self.picture.position.y = self.scan_y[1]
+        self.picture.position.z = self.scan_z[1]
+        self.picture.orientation.x = self.scan_x_o[1]
+        self.picture.orientation.y = self.scan_y_o[1]
+        self.picture.orientation.z = self.scan_z_o[1]
+        self.picture.orientation.w = self.scan_w_o[1]
+        rospy.loginfo('saved first picture pose')
+
+        ## move to home pose and picture pose
+        self.home_position()
+        self.first_position()
+        # self.pc()
+
+    def start_callback(self, req):
+        self.next_pub.publish(String('camera'))
+        return EmptyResponse()
+
+    def reset_callback(self, req):
+        """ reset service callback
+            returns the robot to the first scanning position
+
+            returns:
+                EmptyResponse
+        """
+        # self.home_position()
+        self.first_position()
+        rospy.wait_for_service('generate_pc/save_pc')
+        self.pc()
+        rospy.sleep(2)  # set delay for taking pictures
+
+        # rospy.wait_for_service('timer')
+        self.turtle()
+
+        return EmptyResponse()
+
+    def arm_action_callback(self, req):
+        """
+        /next subscriber callback function to integrate 
+        turtlebot3 motion and point cloud saving service.
+        """
+
+        rospy.loginfo(req)
+        
+        if req == String('camera'):
+            # fix bug here
+            self.debug_pub.publish(String('picture taken'))
+            rospy.wait_for_service('generate_pc/save_pc')
+            self.pc()
+            # print(pc_debug)
+            # rospy.loginfo(pc_debug)
+            rospy.sleep(2)  # set delay for taking pictures
+            self.count = self.count + 1
+            if self.count <= 3:
+                self.debug_pub.publish(String('calling timer'))
+                self.turtle()
+
+            else:
+                self.count = 0
+                p = Pose()
+                p.orientation.x = self.scan_x_o[2]
+                p.orientation.y = self.scan_y_o[2]
+                p.orientation.z = self.scan_z_o[2]
+                p.orientation.w = self.scan_w_o[2]
+                p.position.x = self.scan_x[2]
+                p.position.y = self.scan_y[2]
+                p.position.z = self.scan_z[2]
+
+                self.group.set_pose_target(p)
+                success, traj, p_time, errorcode = self.group.plan()
+                self.group.execute(traj, wait=True)
+                self.group.stop()                                  
+                self.group.clear_pose_targets()
+
+                self.debug_pub.publish(String('picture taken'))
+                rospy.wait_for_service('generate_pc/save_pc')
+                self.pc()
+                rospy.sleep(6)  # set delay for taking pictures
+
+                self.reset_serv()
+                # self.turtle()
+
+    def home_position(self):
+        """
+        Moves robot to pre-defined home position
+        """
+        self.group.set_pose_target(self.home)
+        success, traj, p_time, errorcode = self.group.plan()
+    
+        self.group.execute(traj, wait=True)
+        self.group.stop()                                  
+        self.group.clear_pose_targets()
+        rospy.loginfo('moved to home')
+
+    def first_position(self):
+        """
+        Moves robot to first camera position
+        Side of turtlebot
+        """
+        self.group.set_pose_target(self.picture)
+        success, traj, p_time, errorcode = self.group.plan()
+
+        self.group.execute(traj, wait=True)
+        self.group.stop()                                  
+        self.group.clear_pose_targets()
+        rospy.loginfo('moved to picture position')
+
+    def step_callback(self, req):
+        """ step service callback
+            saves current pose of end effector
+            used mainly for recording approximate waypoints to help in
+            determining points for motion planning task
+
+            returns:
+                EmptyResponse
+        """
+        current_pose = self.group.get_current_pose().pose
+        
+        self.x_list.append(current_pose.position.x)
+        self.y_list.append(current_pose.position.y)
+        self.z_list.append(current_pose.position.z)
+        self.x_o_list.append(current_pose.orientation.x)
+        self.y_o_list.append(current_pose.orientation.y)
+        self.z_o_list.append(current_pose.orientation.z)
+        self.w_o_list.append(current_pose.orientation.w)
+
+        rospy.set_param('/waypoints/x', self.x_list)
+        rospy.set_param('/waypoints/y', self.y_list)
+        rospy.set_param('/waypoints/z', self.z_list)
+        rospy.set_param('/waypoints/x_o', self.x_o_list)
+        rospy.set_param('/waypoints/y_o', self.y_o_list)
+        rospy.set_param('/waypoints/z_o', self.z_o_list)
+        rospy.set_param('/waypoints/w_o', self.w_o_list)
+
+        return EmptyResponse()
+
+    def follow_callback(self, req):
+        """ follow service callback
+            executes the path of previously saved waypoints
+            used to check sanity of planned path from given waypoints
+
+            returns:
+                EmptyResponse
+        """
+        for i in range(len(self.x_list)):
+            p = Pose()
+            p.orientation.x = self.x_o_list[i]
+            p.orientation.y = self.y_o_list[i]
+            p.orientation.z = self.z_o_list[i]
+            p.orientation.w = self.w_o_list[i]
+            p.position.x = self.x_list[i]
+            p.position.y = self.y_list[i]
+            p.position.z = self.z_list[i]
+
+            self.group.set_pose_target(p)
+            success, traj, p_time, errorcode = self.group.plan()
+            self.group.execute(traj, wait=True)
+            self.group.stop()                                   # Calling ``stop()`` ensures that there is no residual movement
+            self.group.clear_pose_targets()
+
+        return EmptyResponse()
+
+
+def main():
+    moveit_commander.roscpp_initialize(sys.argv)
+    mover = MoveGroupPythonInterface()
+
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

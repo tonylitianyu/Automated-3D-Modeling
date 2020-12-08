@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation moveit_
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+#catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -50,10 +50,10 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation moveit_
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   Step.srv
- )
+# add_service_files(
+#   FILES
+#   Step.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -63,12 +63,12 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation moveit_
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   moveit_msgs
-   geometry_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+#   moveit_msgs
+#   geometry_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation moveit_
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES arm_move
-  CATKIN_DEPENDS geometry_msgs message_runtime moveit_msgs std_msgs
+  CATKIN_DEPENDS geometry_msgs message_runtime moveit_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -157,8 +157,11 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
-   nodes/record_waypoints
-   nodes/trajectory
+   nodes/scanner_arm
+   nodes/turntable
+   nodes/turtle
+#   nodes/scanner_arm_multi
+#   nodes/turntable_multi
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
@@ -203,7 +206,7 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-# if(CATKIN_ENABLE_TESTING)
-#    find_package(rostest REQUIRED)
-#    add_rostest(test/arm.test)
-# endif()
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest(test/turntable.test)
+endif()

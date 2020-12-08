@@ -1,19 +1,24 @@
 <launch>
 
+    <!-- Load the sawyer_moveit launchfile  -->
     <include file="$(find sawyer_moveit_config)/launch/sawyer_moveit.launch">
       <arg name="electric_gripper" default="true"/>
     </include>
 
-    <node name="record_waypoints" pkg="arm_motion" type="record_waypoints">
+    <!-- Load the scanner_arm node to integrate sawyer, turtlebot, and camera functions -->
+    <node name="scanner_arm" pkg="arm_motion" type="scanner_arm" output="screen">
       <remap from="joint_states" to="robot/joint_states"/> 
     </node>
 
-    <rosparam command="load" file="$(find arm_motion)/config/waypoints_Nov18.yaml" />
+    <!-- Align -->
+    <arg name="align" default="false" />
+    <node name="find_depth" pkg="camera_motion" type="find_depth" 
+        if="$(eval arg('align') == true)">
+    </node>
+
+    <rosparam command="load" file="$(find arm_motion)/config/waypoints_side_top.yaml" />
 
     <include file="$(find camera_reconstruct)/launch/viewer.launch"/>
-
-    <!-- Added this to try running turtlebot node and sawyer node concurrently -->
-    <!-- <env name="TURTLEBOT3_MODEL" value="burger" /> -->
 
     <include file="$(find arm_motion)/launch/turtlebot.launch"/>
 
