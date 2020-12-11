@@ -1,6 +1,5 @@
 # #Blocked
-This is the final group project for ME495 Fall 2020 at Northwestern University  
-Authors: Arun Kumar, Bowen Feng, Nicole Baptist, Tianyu Li, Yen Chin Loke
+Authors: Tianyu Li, Arun Kumar, Bowen Feng, Nicole Baptist, Yen Chin Loke
 
 <br />
 
@@ -12,6 +11,9 @@ This project creates an automated system for reconstructing objects with point c
 The turtlebot3 is used as a turntable to allow the RealSense camera to record point cloud data for the object from all sides. The Sawyer robot arm is used to control the position and the viewing angle of the camera. 
 
 In the current version, our system will record point clouds from four sides and the top view of the object to recontruct its point cloud.  
+
+## Demo
+![](camera_reconstruct/videos/slam_base.gif)
 
 ## File structure
 ```
@@ -125,11 +127,6 @@ Full demo: [Video](https://drive.google.com/file/d/1BcSyo_AOadVpFWu_8wsWRbMq8CBY
 
 This package contains a pipeline to save multiple point clouds and fuse them into a single point cloud. The package provides a service to save a point clouds and sends saved point clouds through pipeline. This package is ideal for 3D scanning.
 
-original:  
-![](camera_reconstruct/videos/octopus_cropped.gif)  
-
-with SLAM and move_base:  
-![](camera_reconstruct/videos/slam_base.gif)
 
 ### Usage Instructions:
 1. Add package to the src folder in your ROS workspace
