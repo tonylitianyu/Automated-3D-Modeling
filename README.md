@@ -15,6 +15,11 @@ In the current version, our system will record point clouds from four sides and 
 ## Demo
 ![](camera_reconstruct/videos/slam_base.gif)
 
+Full demo in lab with Sawyer: [Video](https://drive.google.com/file/d/1BcSyo_AOadVpFWu_8wsWRbMq8CBYiBKo/view?usp=sharing)
+
+Final demo at home: [Video](https://drive.google.com/file/d/1Ju85MJpGs4Qd3p4OVBtpFYB5iKh3aYQW/view?usp=sharing)
+<br />
+
 ## File structure
 ```
 --final-project-blocked
@@ -118,10 +123,6 @@ This package contains a tool for aligning the center of the depth camera with th
 This package provides nodes to concurrently control the Sawyer robot and turtlebot3, and takes advantage of the pipeline from `camera_reconstruct` to generate the 3D scan form multiple camera views. Click [here](#arm-motion-package) for more details
 
 
-## Demo Videos
-Full demo: [Video](https://drive.google.com/file/d/1BcSyo_AOadVpFWu_8wsWRbMq8CBYiBKo/view?usp=sharing)
-
-<br />
 
 ## Camera Reconstruct Package
 
