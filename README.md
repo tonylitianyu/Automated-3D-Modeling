@@ -18,7 +18,7 @@ In the current version, our system will record point clouds from four sides and 
 - Enhanced the turtlebot turntable motion precision and accuracy with ```slam_toolbox```  and  ```move_base```
 - Created the camera_motion package for alignment at the initial setup with ```OpenCV```
 - Fused and cropped the captured point clouds using ```C++``` with ```PCL```
-- Generated mesh for the point clouds using  ```Open3D library``` and output it to .ply file
+- Generated mesh for the point clouds using  ```Open3D``` library and output it to .ply file
 
 ## Demo
 ![](camera_reconstruct/videos/slam_base.gif)
