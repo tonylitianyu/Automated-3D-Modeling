@@ -12,6 +12,14 @@ The turtlebot3 is used as a turntable to allow the RealSense camera to record po
 
 In the current version, our system will record point clouds from four sides and the top view of the object to recontruct its point cloud.  
 
+## My Contribution
+- Came up with the idea and design the approach
+- Implemented the turntable motion for turtlebot using timer open-loop control
+- Enhanced the turtlebot turntable motion precision and accuracy with ```slam_toolbox```  and  ```move_base```
+- Created the camera_motion package for alignment at the initial setup with ```OpenCV```
+- Fused and cropped the captured point clouds using ```C++``` with ```PCL```
+- Generated mesh for the point clouds using  ```Open3D library``` and output it to .ply file
+
 ## Demo
 ![](camera_reconstruct/videos/slam_base.gif)
 
